@@ -11,19 +11,19 @@ export async function GET() {
     const indiaStations = data.data
       .filter((s: any) => s.country === 'IN')
       .map((s: any) => ({
-        city: s.station.name.replace(', India', ''),
-        aqi: s.aqi === '-' ? 'N/A' : Number(s.aqi),
+        city: s.station.name.replace(', India', '').trim(),
+        aqi: s.aqi === '-' ? 0 : Number(s.aqi),
         lat: s.lat,
         lon: s.lon,
         uid: s.uid,
       }))
-      .sort((a: any, b: any) => (b.aqi - a.aqi);
+      .sort((a: any, b: any) => b.aqi - a.aqi);   // ← fixed the missing )
 
     return NextResponse.json({
       cities: indiaStations,
       updated: new Date().toISOString(),
     });
   } catch (e) {
-    return NextResponse.json({ error: 'Failed' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to fetch' }, { status: 500 });
   }
 }
