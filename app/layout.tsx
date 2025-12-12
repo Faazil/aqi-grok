@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Live AQI India - Real Time Air Quality Index',
-  description: 'Live AQI for Delhi, Mumbai, Bangalore and all Indian cities',
+  title: 'Live AQI India - Real Time Air Quality Delhi, Mumbai, Bangalore',
+  description: 'Live AQI for all Indian cities - Delhi, Mumbai, Noida, Bangalore, Kolkata',
 };
 
 export default function RootLayout({
@@ -15,8 +15,7 @@ export default function RootLayout({
       <head>
         <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.0/dist/tailwind.min.css" rel="stylesheet" />
       </head>
-      <body className="antialiased bg-gray-50 min-h-screen">{children}</body>
+      <body>{children}</body>
     </html>
   );
 }
-
