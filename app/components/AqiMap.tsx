@@ -2,11 +2,11 @@
 
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
+import { useEffect } from 'react';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css';
 import 'leaflet-defaulticon-compatibility';
 
-// Fix icon
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
@@ -24,9 +24,14 @@ interface CityData {
 
 interface AqiMapProps {
   cityData: CityData[];
+  onCitySelect: (city: CityData) => void;
 }
 
-export default function AqiMap({ cityData }: AqiMapProps) {
+export default function AqiMap({ cityData, onCitySelect }: AqiMapProps) {
+  useEffect(() => {
+    // Fix icons if needed
+  }, []);
+
   return (
     <MapContainer center={[20.5937, 78.9629]} zoom={5} style={{ height: '100%', width: '100%' }}>
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
@@ -34,8 +39,9 @@ export default function AqiMap({ cityData }: AqiMapProps) {
         <Marker 
           key={city.name} 
           position={[city.lat, city.lng]}
+          eventHandlers={{ click: () => onCitySelect(city) }}
           icon={L.divIcon({
-            className: 'custom-div-icon',
+            className: 'custom-marker',
             html: `<div style="background-color: ${getAqiColor(city.aqi)}; width: 40px; height: 40px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 10px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px;">${city.aqi}</div>`,
             iconSize: [40, 40],
             iconAnchor: [20, 20],
@@ -49,7 +55,7 @@ export default function AqiMap({ cityData }: AqiMapProps) {
               <p className="text-sm text-gray-600">PM2.5 dominant</p>
             </div>
           </Popup>
-          </Marker>
+        </Marker>
       ))}
     </MapContainer>
   );
