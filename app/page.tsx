@@ -1,24 +1,29 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
+
+// Dynamically import the map to avoid SSR issues
+const AqiMap = dynamic(() => import('./components/AqiMap'), { ssr: false });
 
 const CITIES = [
-  { name: 'Delhi', lat: 28.7041, lng: 77.1025, aqi: 717, dominant: 'PM2.5', level: 'Hazardous' },
-  { name: 'Mumbai', lat: 19.0760, lng: 72.8777, aqi: 167, dominant: 'PM2.5', level: 'Unhealthy' },
-  { name: 'Bengaluru', lat: 12.9716, lng: 77.5946, aqi: 151, dominant: 'PM2.5', level: 'Unhealthy for Sensitive' },
-  { name: 'Hyderabad', lat: 17.3850, lng: 78.4867, aqi: 192, dominant: 'PM2.5', level: 'Unhealthy' },
-  { name: 'Chennai', lat: 13.0827, lng: 80.2707, aqi: 156, dominant: 'PM2.5', level: 'Unhealthy' },
-  { name: 'Kolkata', lat: 22.5726, lng: 88.3639, aqi: 424, dominant: 'PM2.5', level: 'Hazardous' },
-  { name: 'Ahmedabad', lat: 23.0225, lng: 72.5714, aqi: 192, dominant: 'PM2.5', level: 'Unhealthy' },
-  { name: 'Pune', lat: 18.5204, lng: 73.8567, aqi: 268, dominant: 'PM2.5', level: 'Very Unhealthy' },
-  { name: 'Jaipur', lat: 26.9124, lng: 75.7873, aqi: 180, dominant: 'PM2.5', level: 'Unhealthy for Sensitive' },
-  { name: 'Lucknow', lat: 26.8467, lng: 80.9462, aqi: 513, dominant: 'PM2.5', level: 'Hazardous' },
+  { name: 'Delhi', slug: 'delhi', lat: 28.7041, lng: 77.1025 },
+  { name: 'Mumbai', slug: 'mumbai', lat: 19.0760, lng: 72.8777 },
+  { name: 'Bengaluru', slug: 'bangalore', lat: 12.9716, lng: 77.5946 },
+  { name: 'Hyderabad', slug: 'hyderabad', lat: 17.3850, lng: 78.4867 },
+  { name: 'Chennai', slug: 'chennai', lat: 13.0827, lng: 80.2707 },
+  { name: 'Kolkata', slug: 'kolkata', lat: 22.5726, lng: 88.3639 },
+  { name: 'Ahmedabad', slug: 'ahmedabad', lat: 23.0225, lng: 72.5714 },
+  { name: 'Pune', slug: 'pune', lat: 18.5204, lng: 73.8567 },
+  { name: 'Jaipur', slug: 'jaipur', lat: 26.9124, lng: 75.7873 },
+  { name: 'Lucknow', slug: 'lucknow', lat: 26.8467, lng: 80.9462 },
 ];
 
-const TOKEN = 'YOUR_WAQI_TOKEN_HERE'; // Replace for live
+const TOKEN = 'YOUR_WAQI_TOKEN_HERE'; // Replace with your actual WAQI token
 
 interface CityData {
   name: string;
+  slug: string;
   lat: number;
   lng: number;
   aqi: number | null;
@@ -47,33 +52,70 @@ function getAqiLevel(aqi: number | null): string {
 }
 
 export default function Home() {
-  const [cityData, setCityData] = useState<CityData[]>(CITIES);
-  const [selectedCity, setSelectedCity] = useState<CityData | null>(null);
+  const [cityData, setCityData] = useState<CityData[]>(CITIES.map(city => ({ ...city, aqi: null, dominant: 'PM2.5', level: 'Loading...' })));
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  // Live fetch logic (same as before)
   useEffect(() => {
-    // ... (fetch code from previous, omitted for brevity)
+    const fetchData = async () => {
+      if (!TOKEN || TOKEN === 'YOUR_WAQI_TOKEN_HERE') {
+        setError('Token missing');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const promises = CITIES.map(async (city) => {
+          const res = await fetch(`https://api.waqi.info/feed/${city.slug}/?token=${TOKEN}`);
+          const json = await res.json();
+          if (json.status !== 'ok') return { ...city, aqi: null, dominant: 'N/A', level: 'Error' };
+          const data = json.data;
+          return {
+            ...city,
+            aqi: data.aqi || null,
+            dominant: data.dominentpol || 'PM2.5',
+            level: getAqiLevel(data.aqi),
+          };
+        });
+
+        const results = await Promise.all(promises);
+        setCityData(results);
+      } catch (e) {
+        setError('Fetch failed');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+    const interval = setInterval(fetchData, 300000); // Refresh every 5 minutes
+    return () => clearInterval(interval);
   }, []);
 
-  const nationalAverage = Math.round(CITIES.reduce((sum, c) => sum + c.aqi, 0) / CITIES.length);
+  const validCities = cityData.filter(c => c.aqi !== null);
+  const nationalAverage = validCities.length > 0 ? Math.round(validCities.reduce((sum, c) => sum + c.aqi!, 0) / validCities.length) : null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-green-50 to-blue-100">
-      {/* Hero with Nature Wallpaper */}
+    <div className="min-h-screen bg-gradient-to-b from-cyan-50 to-blue-100">
+      {/* Hero Section with Nature Wallpaper */}
       <header className="relative h-96 md:h-screen flex items-center justify-center overflow-hidden text-center">
         <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-30"
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-40"
           style={{ backgroundImage: "url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')" }} // Nature wallpaper: Green hills and blue sky
         ></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-cyan-50/80"></div>
         <div className="relative z-10 px-6">
-          <h1 className="text-5xl md:text-8xl font-extrabold text-green-900 mb-6 drop-shadow-2xl">Live AQI India</h1>
-          <p className="text-2xl md:text-4xl text-green-800 mb-8">Interactive City Map & Real-Time Dashboard</p>
-          <p className="text-xl text-green-700 mb-12">Powered by WAQI.info • Updated December 14, 2025</p>
-          <div className="inline-block bg-white/90 backdrop-blur-lg rounded-3xl p-8 md:p-12 shadow-2xl">
-            <p className="text-7xl md:text-9xl font-black text-green-900">{nationalAverage}</p>
-            <p className="text-2xl md:text-4xl text-green-700 mt-4">{getAqiLevel(nationalAverage)}</p>
-            <p className="text-lg md:text-xl text-green-600 mt-2">National Average AQI</p>
-          </div>
+          <h1 className="text-5xl md:text-8xl font-extrabold text-indigo-900 mb-6 drop-shadow-2xl">Live AQI India</h1>
+          <p className="text-2xl md:text-4xl text-indigo-800 mb-8">Interactive City Map & Real-Time Dashboard</p>
+          <p className="text-xl text-indigo-700 mb-12">Powered by WAQI.info • Updated December 14, 2025</p>
+          {nationalAverage && (
+            <div className="inline-block bg-white/90 backdrop-blur-lg rounded-3xl p-8 md:p-12 shadow-2xl">
+              <p className="text-7xl md:text-9xl font-black text-indigo-900">{nationalAverage}</p>
+              <p className="text-2xl md:text-4xl text-indigo-700 mt-4">{getAqiLevel(nationalAverage)}</p>
+              <p className="text-lg md:text-xl text-indigo-600 mt-2">National Average AQI</p>
+            </div>
+          )}
         </div>
       </header>
 
@@ -81,30 +123,18 @@ export default function Home() {
       <section className="max-w-7xl mx-auto px-6 py-16">
         <h2 className="text-4xl md:text-5xl font-bold text-center mb-12 text-gray-800">Interactive City Map</h2>
         <div className="h-96 md:h-[600px] rounded-3xl overflow-hidden shadow-2xl">
-          <AqiMap cityData={cityData} onCitySelect={setSelectedCity} />
+          <AqiMap cityData={cityData} />
         </div>
         <p className="text-center mt-6 text-gray-600">Zoom and click markers for city details | Tinted by AQI level</p>
       </section>
 
-      {/* Selected City Detail (Tinted Box) */}
-      {selectedCity && (
-        <section className="max-w-md mx-auto mb-16 rounded-3xl overflow-hidden shadow-2xl" style={{ backgroundColor: getAqiColor(selectedCity.aqi) }}>
-          <div className="p-8 text-white text-center">
-            <h3 className="text-3xl font-bold mb-4">{selectedCity.name}</h3>
-            <p className="text-6xl font-black mb-4">{selectedCity.aqi}</p>
-            <p className="text-2xl mb-2">{selectedCity.level}</p>
-            <p className="text-xl">{selectedCity.dominant} dominant</p>
-          </div>
-        </section>
-      )}
-
-      {/* Tinted Boxes for Cities/States */}
+      {/* City & State AQI Overview (Tinted Boxes) */}
       <section className="max-w-7xl mx-auto px-6 py-16">
         <h2 className="text-4xl md:text-5xl font-bold text-center mb-12 text-gray-800">City & State AQI Overview</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10">
           {cityData.map((city) => (
-            <div key={city.name} className="group bg-white/95 backdrop-blur-md rounded-3xl shadow-2xl overflow-hidden hover:shadow-3xl hover:-translate-y-4 transition-all duration-500 cursor-pointer" onClick={() => setSelectedCity(city)}>
-              <div className={`${getAqiColor(city.aqi)} h-48 flex flex-col items-center justify-center text-white relative overflow-hidden`} style={{ backgroundColor: getAqiColor(city.aqi) }}>
+            <div key={city.name} className="group bg-white/95 backdrop-blur-md rounded-3xl shadow-2xl overflow-hidden hover:shadow-3xl hover:-translate-y-4 transition-all duration-500">
+              <div className={`${getAqiColor(city.aqi)} h-48 flex flex-col items-center justify-center text-white relative overflow-hidden`}>
                 <div className="absolute inset-0 bg-black/10"></div>
                 <p className="text-7xl md:text-8xl font-extrabold drop-shadow-2xl relative z-10">{city.aqi || '--'}</p>
                 <p className="text-xl md:text-2xl font-bold mt-4 drop-shadow-lg relative z-10">{city.level}</p>
