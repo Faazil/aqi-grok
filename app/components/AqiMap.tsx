@@ -3,16 +3,6 @@
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import { useEffect } from 'react';
-import 'leaflet/dist/leaflet.css';
-import 'leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css';
-import 'leaflet-defaulticon-compatibility';
-
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-});
 
 interface CityData {
   name: string;
@@ -26,10 +16,29 @@ interface AqiMapProps {
   cityData: CityData[];
 }
 
+function getAqiColor(aqi: number) {
+  if (aqi <= 50) return '#10b981';
+  if (aqi <= 100) return '#f59e0b';
+  if (aqi <= 150) return '#f97316';
+  if (aqi <= 200) return '#ef4444';
+  if (aqi <= 300) return '#a855f7';
+  return '#1e293b';
+}
+
 export default function AqiMap({ cityData }: AqiMapProps) {
   useEffect(() => {
-    // Fix icons if needed
+    if (typeof window !== 'undefined') {
+      const L = require('leaflet');
+      delete (L.Icon.Default.prototype as any)._getIconUrl;
+      L.Icon.Default.mergeOptions({
+        iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
+        iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+      });
+    }
   }, []);
+
+  if (typeof window === 'undefined') return null;
 
   return (
     <MapContainer center={[20.5937, 78.9629]} zoom={5} style={{ height: '100%', width: '100%' }}>
@@ -38,6 +47,12 @@ export default function AqiMap({ cityData }: AqiMapProps) {
         <Marker 
           key={city.name} 
           position={[city.lat, city.lng]}
+          icon={L.divIcon({
+            className: 'custom-div-icon',
+            html: `<div style="background-color: ${getAqiColor(city.aqi)}; width: 40px; height: 40px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 10px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px;">${city.aqi}</div>`,
+            iconSize: [40, 40],
+            iconAnchor: [20, 20],
+          })}
         >
           <Popup>
             <div className="text-center">
