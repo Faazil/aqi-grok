@@ -27,8 +27,7 @@ export default function Home() {
       <header className="relative overflow-hidden bg-gradient-to-r from-indigo-800 via-purple-800 to-pink-800 text-white py-20 px-4">
         <div 
           className="absolute inset-0 bg-cover bg-center opacity-20"
-          style={{
-            backgroundImage: "url('https://images.unsplash.com/photo-1559945008-4c6e8b2a2b9a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')" // Free Unsplash: Clean Delhi skyline at dusk
+          style={{ backgroundImage: "url('https://images.unsplash.com/photo-1599669454699-248893623440?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')" }} // Free Unsplash: Clean Delhi skyline at dusk
           }}
         ></div>
         <div className="relative max-w-7xl mx-auto text-center z-10">
