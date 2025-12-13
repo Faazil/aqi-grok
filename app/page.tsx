@@ -87,36 +87,36 @@ export default function Home() {
   const nationalAverage = validCities.length > 0 ? Math.round(validCities.reduce((sum, c) => sum + c.aqi!, 0) / validCities.length) : null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-cyan-50 to-indigo-100">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-cyan-100">
       {/* Hero */}
-      <header className="relative py-20 text-center">
-        <div className="absolute inset-0 bg-cover bg-center opacity-30" style={{ backgroundImage: "url('https://assets.gqindia.com/photos/690da1ef787f74b2812a8247/master/w_1600,c_limit/Kullu.jpg')" }}></div>
+      <header className="relative py-24 text-center">
+        <div className="absolute inset-0 bg-cover bg-center opacity-40" style={{ backgroundImage: "url('https://cdn.dribbble.com/userupload/44266015/file/0dafdd4dceb07d755d1dcee2c331c179.png?resize=2048x1480&vertical=center')" }}></div>
         <div className="relative z-10">
-          <h1 className="text-6xl font-bold text-indigo-900 mb-4">Live AQI India</h1>
-          <p className="text-2xl text-indigo-800 mb-8">Real-Time Air Quality Dashboard</p>
+          <h1 className="text-6xl font-bold text-indigo-900 mb-6">Live AQI India</h1>
+          <p className="text-3xl text-indigo-800 mb-10">Real-Time Air Quality Dashboard</p>
           {nationalAverage && (
-            <div className="inline-block bg-white/80 backdrop-blur rounded-3xl p-8 shadow-xl">
-              <p className="text-8xl font-black text-indigo-900">{nationalAverage}</p>
-              <p className="text-3xl text-indigo-700">{getAqiLevel(nationalAverage)}</p>
-              <p className="text-xl text-indigo-600 mt-2">National Average</p>
+            <div className="inline-block bg-white/90 backdrop-blur rounded-3xl p-12 shadow-2xl">
+              <p className="text-9xl font-black text-indigo-900">{nationalAverage}</p>
+              <p className="text-4xl text-indigo-700 mt-4">{getAqiLevel(nationalAverage)}</p>
+              <p className="text-2xl text-indigo-600 mt-2">National Average</p>
             </div>
           )}
         </div>
       </header>
 
       {/* Cards */}
-      <section className="max-w-7xl mx-auto px-6 py-12">
-        <h2 className="text-4xl font-bold text-center mb-12 text-gray-800">Major Cities Live AQI</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+      <section className="max-w-7xl mx-auto px-6 py-16">
+        <h2 className="text-5xl font-bold text-center mb-16 text-gray-800">Major Cities Live AQI</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-12">
           {cityData.map((city) => (
-            <div key={city.name} className="bg-white rounded-3xl shadow-2xl overflow-hidden hover:shadow-3xl transition-all duration-300">
-              <div className={`${getAqiColor(city.aqi)} h-40 flex flex-col items-center justify-center text-white`}>
-                <p className="text-7xl font-bold">{city.aqi || '--'}</p>
-                <p className="text-xl mt-2">{city.level}</p>
+            <div key={city.name} className="bg-white rounded-3xl shadow-2xl overflow-hidden hover:shadow-3xl hover:-translate-y-4 transition-all duration-500">
+              <div className={`${getAqiColor(city.aqi)} h-56 flex flex-col items-center justify-center text-white`}>
+                <p className="text-8xl font-extrabold">{city.aqi || '--'}</p>
+                <p className="text-2xl mt-4">{city.level}</p>
               </div>
-              <div className="p-6 text-center">
-                <h3 className="text-2xl font-bold text-gray-800">{city.name}</h3>
-                <p className="text-gray-600 mt-2">{city.dominant} dominant</p>
+              <div className="p-8 text-center">
+                <h3 className="text-3xl font-bold text-gray-800 mb-3">{city.name}</h3>
+                <p className="text-xl text-gray-600">{city.dominant} dominant</p>
               </div>
             </div>
           ))}
@@ -124,23 +124,23 @@ export default function Home() {
       </section>
 
       {/* Health Tips */}
-      <section className="max-w-6xl mx-auto px-6 py-12 bg-white/90 rounded-3xl shadow-2xl mb-16">
-        <h2 className="text-3xl font-bold text-center mb-8 text-gray-800">Health Tips</h2>
-        <div className="grid md:grid-cols-3 gap-8">
-          <div className="p-6 bg-gradient-to-br from-green-50 to-teal-100 rounded-3xl text-center shadow-lg">
-            <span className="text-6xl block mb-4">😷</span>
-            <h3 className="text-xl font-bold mb-2">Wear N95 Masks Outdoors</h3>
-            <p className="text-gray-700">Especially in Hazardous cities like Delhi</p>
+      <section className="max-w-6xl mx-auto px-6 py-16 bg-white/90 rounded-3xl shadow-2xl mb-20">
+        <h2 className="text-4xl font-bold text-center mb-12 text-gray-800">Health Tips for Current Conditions</h2>
+        <div className="grid md:grid-cols-3 gap-10">
+          <div className="p-10 bg-gradient-to-br from-green-50 to-blue-100 rounded-3xl text-center shadow-lg">
+            <span className="text-7xl block mb-6">😷</span>
+            <h3 className="text-2xl font-bold mb-4">Wear N95 Masks</h3>
+            <p className="text-gray-700">Critical in Hazardous cities like Delhi</p>
           </div>
-          <div className="p-6 bg-gradient-to-br from-orange-50 to-red-100 rounded-3xl text-center shadow-lg">
-            <span className="text-6xl block mb-4">🏠</span>
-            <h3 className="text-xl font-bold mb-2">Limit Outdoor Activities</h3>
-            <p className="text-gray-700">Sensitive groups should stay indoors</p>
+          <div className="p-10 bg-gradient-to-br from-orange-50 to-red-100 rounded-3xl text-center shadow-lg">
+            <span className="text-7xl block mb-6">🏠</span>
+            <h3 className="text-2xl font-bold mb-4">Stay Indoors</h3>
+            <p className="text-gray-700">Avoid exertion in Unhealthy areas</p>
           </div>
-          <div className="p-6 bg-gradient-to-br from-purple-50 to-indigo-100 rounded-3xl text-center shadow-lg">
-            <span className="text-6xl block mb-4">🌬️</span>
-            <h3 className="text-xl font-bold mb-2">Use Air Purifiers</h3>
-            <p className="text-gray-700">Keep windows closed in Unhealthy areas</p>
+          <div className="p-10 bg-gradient-to-br from-purple-50 to-indigo-100 rounded-3xl text-center shadow-lg">
+            <span className="text-7xl block mb-6">🌬️</span>
+            <h3 className="text-2xl font-bold mb-4">Use Air Purifiers</h3>
+            <p className="text-gray-700">Keep windows closed</p>
           </div>
         </div>
       </section>
