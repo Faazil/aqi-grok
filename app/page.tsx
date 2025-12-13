@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 
-// Dynamically import the map to avoid SSR issues
+// Dynamic map import (no SSR)
 const AqiMap = dynamic(() => import('./components/AqiMap'), { ssr: false });
 
 const CITIES = [
@@ -19,7 +19,7 @@ const CITIES = [
   { name: 'Lucknow', slug: 'lucknow', lat: 26.8467, lng: 80.9462 },
 ];
 
-const TOKEN = 'YOUR_WAQI_TOKEN_HERE'; // Replace with your actual WAQI token
+const TOKEN = 'YOUR_WAQI_TOKEN_HERE'; // Replace!
 
 interface CityData {
   name: string;
@@ -54,12 +54,10 @@ function getAqiLevel(aqi: number | null): string {
 export default function Home() {
   const [cityData, setCityData] = useState<CityData[]>(CITIES.map(city => ({ ...city, aqi: null, dominant: 'PM2.5', level: 'Loading...' })));
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
 
   useEffect(() => {
     const fetchData = async () => {
       if (!TOKEN || TOKEN === 'YOUR_WAQI_TOKEN_HERE') {
-        setError('Token missing');
         setLoading(false);
         return;
       }
@@ -82,14 +80,14 @@ export default function Home() {
         const results = await Promise.all(promises);
         setCityData(results);
       } catch (e) {
-        setError('Fetch failed');
+        console.error(e);
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-    const interval = setInterval(fetchData, 300000); // Refresh every 5 minutes
+    const interval = setInterval(fetchData, 300000);
     return () => clearInterval(interval);
   }, []);
 
