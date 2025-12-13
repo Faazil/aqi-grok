@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import 'leaflet/dist/leaflet.css';
 
 export const metadata: Metadata = {
   title: 'Live AQI India - Real Time Air Quality Delhi, Mumbai, Bangalore',
