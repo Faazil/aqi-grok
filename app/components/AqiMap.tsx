@@ -24,10 +24,9 @@ interface CityData {
 
 interface AqiMapProps {
   cityData: CityData[];
-  onCitySelect: (city: CityData) => void;
 }
 
-export default function AqiMap({ cityData, onCitySelect }: AqiMapProps) {
+export default function AqiMap({ cityData }: AqiMapProps) {
   useEffect(() => {
     // Fix icons if needed
   }, []);
@@ -39,13 +38,6 @@ export default function AqiMap({ cityData, onCitySelect }: AqiMapProps) {
         <Marker 
           key={city.name} 
           position={[city.lat, city.lng]}
-          eventHandlers={{ click: () => onCitySelect(city) }}
-          icon={L.divIcon({
-            className: 'custom-marker',
-            html: `<div style="background-color: ${getAqiColor(city.aqi)}; width: 40px; height: 40px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 10px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px;">${city.aqi}</div>`,
-            iconSize: [40, 40],
-            iconAnchor: [20, 20],
-          })}
         >
           <Popup>
             <div className="text-center">
@@ -59,13 +51,4 @@ export default function AqiMap({ cityData, onCitySelect }: AqiMapProps) {
       ))}
     </MapContainer>
   );
-}
-
-function getAqiColor(aqi: number) {
-  if (aqi <= 50) return '#10b981';
-  if (aqi <= 100) return '#f59e0b';
-  if (aqi <= 150) return '#f97316';
-  if (aqi <= 200) return '#ef4444';
-  if (aqi <= 300) return '#a855f7';
-  return '#1e293b';
 }
