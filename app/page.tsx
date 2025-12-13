@@ -53,7 +53,7 @@ export default function Home() {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!TOKEN || TOKEN === 'YOUR_WAQI_TOKEN_HERE') {
+      if (!TOKEN || TOKEN === 'ccf9886c6c972e354ecebca2730511ec2e928183') {
         setLoading(false);
         return;
       }
