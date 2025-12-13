@@ -16,7 +16,7 @@ const CITIES = [
   { name: 'Lucknow', slug: 'lucknow', lat: 26.8467, lng: 80.9462 },
 ];
 
-const TOKEN = 'ccf9886c6c972e354ecebca2730511ec2e928183'; // ← REPLACE THIS!
+const TOKEN = 'ccf9886c6c972e354ecebca2730511ec2e928183'; // Replace!
 
 interface CityData {
   name: string;
@@ -50,12 +50,10 @@ function getAqiLevel(aqi: number | null): string {
 export default function Home() {
   const [cityData, setCityData] = useState<CityData[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
 
   useEffect(() => {
-    const fetchAll = async () => {
-      if (!TOKEN || TOKEN === 'ccf9886c6c972e354ecebca2730511ec2e928183') {
-        setError('WAQI token missing!');
+    const fetchData = async () => {
+      if (!TOKEN || TOKEN === 'YOUR_WAQI_TOKEN_HERE') {
         setLoading(false);
         return;
       }
@@ -64,7 +62,7 @@ export default function Home() {
         const promises = CITIES.map(async (city) => {
           const res = await fetch(`https://api.waqi.info/feed/${city.slug}/?token=${TOKEN}`);
           const json = await res.json();
-          if (json.status !== 'ok') return { ...city, aqi: null, dominant: 'N/A', level: 'Error' };
+          if (json.status !== 'ok') return { name: city.name, aqi: null, dominant: 'N/A', level: 'Error', lat: city.lat, lng: city.lng };
           const data = json.data;
           return {
             name: city.name,
@@ -79,21 +77,19 @@ export default function Home() {
         const results = await Promise.all(promises);
         setCityData(results);
       } catch (e) {
-        setError('Network error');
+        console.error(e);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchAll();
-    const interval = setInterval(fetchAll, 300000); // 5 min
+    fetchData();
+    const interval = setInterval(fetchData, 300000);
     return () => clearInterval(interval);
   }, []);
 
-  const validCities = cityData.filter((c) => c.aqi !== null);
-  const nationalAverage = validCities.length > 0
-    ? Math.round(validCities.reduce((sum, c) => sum + c.aqi!, 0) / validCities.length)
-    : null;
+  const validCities = cityData.filter(c => c.aqi !== null);
+  const nationalAverage = validCities.length > 0 ? Math.round(validCities.reduce((sum, c) => sum + c.aqi!, 0) / validCities.length) : null;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-sky-50 to-indigo-100">
@@ -101,7 +97,7 @@ export default function Home() {
       <header className="py-16 text-center bg-gradient-to-b from-indigo-600 to-purple-700 text-white">
         <h1 className="text-5xl md:text-7xl font-bold mb-4">Live AQI India</h1>
         <p className="text-2xl mb-8">Real-Time Air Quality Dashboard</p>
-        {nationalAverage !== null && (
+        {nationalAverage && (
           <div className="inline-block bg-white/20 backdrop-blur-lg rounded-3xl p-10">
             <p className="text-8xl font-black">{nationalAverage}</p>
             <p className="text-3xl">{getAqiLevel(nationalAverage)}</p>
@@ -110,7 +106,7 @@ export default function Home() {
         )}
       </header>
 
-      {/* Map */}
+      {/* Interactive Map */}
       <section className="mx-4 my-12 h-96 rounded-3xl overflow-hidden shadow-2xl">
         <AqiMap cityData={cityData} />
       </section>
@@ -118,11 +114,10 @@ export default function Home() {
       {/* City Cards */}
       <section className="max-w-7xl mx-auto px-6 py-12">
         <h2 className="text-4xl font-bold text-center mb-10 text-gray-800">Major Cities Live AQI</h2>
-        {error && <p className="text-red-500 text-center mb-6">{error}</p>}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
           {cityData.map((city) => (
             <div key={city.name} className="bg-white rounded-2xl shadow-xl p-6 text-center hover:shadow-2xl transition">
-              <div className={`text-5xl font-bold mb-2 ${getAqiColor(city.aqi)} text-white py-4 rounded-t-2xl`}>
+              <div className={`text-5xl font-bold mb-2 py-4 rounded-t-2xl text-white ${getAqiColor(city.aqi)}`}>
                 {city.aqi || '--'}
               </div>
               <p className="text-xl font-semibold mb-2">{city.level}</p>
