@@ -1,15 +1,18 @@
 'use client';
 
-import dynamic from 'next/dynamic';
-import { useState } from 'react';
-
-// Dynamically import react-leaflet components (no SSR)
-const MapContainer = dynamic(() => import('react-leaflet').then(mod => mod.MapContainer), { ssr: false });
-const TileLayer = dynamic(() => import('react-leaflet').then(mod => mod.TileLayer), { ssr: false });
-const Marker = dynamic(() => import('react-leaflet').then(mod => mod.Marker), { ssr: false });
-const Popup = dynamic(() => import('react-leaflet').then(mod => mod.Popup), { ssr: false });
-
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import 'leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css';
 import 'leaflet-defaulticon-compatibility';
+
+// Fix icon
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+});
 
 interface CityData {
   name: string;
@@ -24,30 +27,39 @@ interface AqiMapProps {
 }
 
 export default function AqiMap({ cityData }: AqiMapProps) {
-  const [isMounted, setIsMounted] = useState(false);
-
-  // Ensure it's client-side
-  if (typeof window === 'undefined') return null;
-
-  if (!isMounted) {
-    setIsMounted(true);
-    return <div className="h-96 bg-gray-200 flex items-center justify-center rounded-3xl">Loading map...</div>;
-  }
-
   return (
-    <MapContainer center={[20.5937, 78.9629]} zoom={5} className="h-full w-full rounded-3xl">
+    <MapContainer center={[20.5937, 78.9629]} zoom={5} style={{ height: '100%', width: '100%' }}>
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-      {cityData.map((city) => city.aqi !== null && (
-        <Marker key={city.name} position={[city.lat, city.lng]}>
+      {cityData.map((city) => city.aqi && (
+        <Marker 
+          key={city.name} 
+          position={[city.lat, city.lng]}
+          icon={L.divIcon({
+            className: 'custom-div-icon',
+            html: `<div style="background-color: ${getAqiColor(city.aqi)}; width: 40px; height: 40px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 10px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px;">${city.aqi}</div>`,
+            iconSize: [40, 40],
+            iconAnchor: [20, 20],
+          })}
+        >
           <Popup>
-            <div className="text-center p-2">
-              <p className="font-bold text-lg">{city.name}</p>
-              <p className="text-2xl font-bold">{city.aqi}</p>
-              <p>{city.level}</p>
+            <div className="text-center">
+              <h3 className="font-bold text-lg mb-2">{city.name}</h3>
+              <p className="text-2xl font-bold mb-1">{city.aqi}</p>
+              <p className="mb-1">{city.level}</p>
+              <p className="text-sm text-gray-600">PM2.5 dominant</p>
             </div>
           </Popup>
-        </Marker>
+          </Marker>
       ))}
     </MapContainer>
   );
+}
+
+function getAqiColor(aqi: number) {
+  if (aqi <= 50) return '#10b981';
+  if (aqi <= 100) return '#f59e0b';
+  if (aqi <= 150) return '#f97316';
+  if (aqi <= 200) return '#ef4444';
+  if (aqi <= 300) return '#a855f7';
+  return '#1e293b';
 }
