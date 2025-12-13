@@ -26,7 +26,7 @@ const CITIES = [
   { name: 'Lucknow', slug: 'lucknow', lat: 26.8467, lng: 80.9462 },
 ];
 
-const TOKEN = 'YOUR_WAQI_TOKEN_HERE'; // ← Replace with your real token!
+const TOKEN = 'ccf9886c6c972e354ecebca2730511ec2e928183'; // ← Replace with your real token!
 
 interface CityData {
   name: string;
@@ -64,7 +64,7 @@ export default function Home() {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!TOKEN || TOKEN === 'YOUR_WAQI_TOKEN_HERE') {
+      if (!TOKEN || TOKEN === 'ccf9886c6c972e354ecebca2730511ec2e928183') {
         setError('Add your WAQI token!');
         setLoading(false);
         return;
