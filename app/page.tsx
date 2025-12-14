@@ -25,12 +25,6 @@ export default function HomePage() {
     { city: 'Jaipur', aqi: 160 },
   ];
 
-  const searchCity = () => {
-    if (!search.trim()) return;
-    alert(`Searching AQI for ${search}`);
-  };
-
-  // visitor counter (client-only, light)
   useEffect(() => {
     const key = 'aqiindia-visits-' + new Date().toDateString();
     const count = Number(localStorage.getItem(key) || 0) + 1;
@@ -43,25 +37,26 @@ export default function HomePage() {
     <main
       style={{
         minHeight: '100vh',
-        maxWidth: '100vw',
+        width: '100%',
         overflowX: 'hidden',
-        padding: '24px 28px',
-        backgroundImage: 'url(/bg.jpg)',   // ✅ background restored
+        padding: '28px',
+        backgroundImage: 'url("/bg.jpg")',   // ✅ WILL WORK
         backgroundSize: 'cover',
         backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
         backgroundAttachment: 'fixed',
       }}
     >
-      {/* MAIN GRID */}
+      {/* GRID */}
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: '260px 1fr 420px',
-          gap: 24,
+          gridTemplateColumns: '240px minmax(520px, 1fr) 360px', // ⬅ pulled inward
+          gap: 20,
           alignItems: 'start',
         }}
       >
-        {/* LEFT – TOP 5 */}
+        {/* LEFT */}
         <div>
           <h3 style={{ color: '#fff', marginBottom: 12 }}>🚨 Worst AQI (Top 5)</h3>
           {worst.map((w) => (
@@ -70,9 +65,9 @@ export default function HomePage() {
               style={{
                 background: '#dc2626',
                 color: '#fff',
-                padding: '12px 16px',
+                padding: '12px 14px',
                 borderRadius: 14,
-                marginBottom: 10,
+                marginBottom: 8,
                 display: 'flex',
                 justifyContent: 'space-between',
                 fontWeight: 600,
@@ -83,7 +78,7 @@ export default function HomePage() {
             </div>
           ))}
 
-          <h3 style={{ color: '#fff', margin: '20px 0 12px' }}>
+          <h3 style={{ color: '#fff', margin: '18px 0 10px' }}>
             🌿 Best AQI (Top 5)
           </h3>
           {best.map((b) => (
@@ -93,9 +88,9 @@ export default function HomePage() {
                 background:
                   b.aqi < 100 ? '#16a34a' : b.aqi < 150 ? '#facc15' : '#fb923c',
                 color: '#000',
-                padding: '12px 16px',
+                padding: '12px 14px',
                 borderRadius: 14,
-                marginBottom: 10,
+                marginBottom: 8,
                 display: 'flex',
                 justifyContent: 'space-between',
                 fontWeight: 600,
@@ -107,9 +102,9 @@ export default function HomePage() {
           ))}
         </div>
 
-        {/* CENTER – LIVE AQI */}
+        {/* CENTER */}
         <div style={{ textAlign: 'center', color: '#fff' }}>
-          <h1 style={{ fontSize: 48, marginBottom: 16 }}>
+          <h1 style={{ fontSize: 46, marginBottom: 14 }}>
             Live AQI India
           </h1>
 
@@ -117,21 +112,20 @@ export default function HomePage() {
             style={{
               background: '#fff',
               color: '#4f46e5',
-              display: 'inline-block',
-              padding: '32px 56px',          // ⬆ bigger
+              padding: '34px 58px',
               borderRadius: 24,
-              boxShadow: '0 14px 34px rgba(0,0,0,0.45)',
-              marginBottom: 18,
+              display: 'inline-block',
+              boxShadow: '0 16px 40px rgba(0,0,0,0.5)',
+              marginBottom: 16,
             }}
           >
-            <div style={{ fontSize: 62, fontWeight: 800 }}>
+            <div style={{ fontSize: 64, fontWeight: 800 }}>
               {nationalAverage}
             </div>
             <div style={{ fontSize: 14 }}>National Average AQI</div>
           </div>
 
-          {/* SEARCH BAR */}
-          <div style={{ marginBottom: 8 }}>
+          <div>
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -143,14 +137,12 @@ export default function HomePage() {
                 borderRadius: 16,
                 border: 'none',
                 outline: 'none',
-                fontSize: 15,
               }}
             />
             <button
-              onClick={searchCity}
               style={{
                 marginLeft: 10,
-                padding: '14px 28px',
+                padding: '14px 26px',
                 borderRadius: 16,
                 border: 'none',
                 background: '#4f46e5',
@@ -163,38 +155,37 @@ export default function HomePage() {
             </button>
           </div>
 
-          <div style={{ fontSize: 12, opacity: 0.85 }}>
+          <div style={{ fontSize: 12, marginTop: 6 }}>
             ● Live · Last updated 2:57 AM
           </div>
         </div>
 
-        {/* RIGHT – BIGGER VERTICAL MAP */}
+        {/* RIGHT */}
         <div
           style={{
-            height: '600px',               // ⬆ bigger map
+            height: '640px',
             borderRadius: 20,
             overflow: 'hidden',
-            boxShadow: '0 16px 40px rgba(0,0,0,0.5)',
+            boxShadow: '0 18px 44px rgba(0,0,0,0.55)',
           }}
         >
           <Map />
         </div>
       </div>
 
-      {/* VISITOR COUNT – BOTTOM CENTER */}
-      <footer
+      {/* FOOTER */}
+      <div
         style={{
           position: 'fixed',
-          bottom: 12,
+          bottom: 14,
           left: '50%',
           transform: 'translateX(-50%)',
-          fontSize: 14,
+          fontSize: 15,
           color: '#e5e7eb',
-          opacity: 0.9,
         }}
       >
         👁️ Visitors today: <strong id="visitor-count">—</strong>
-      </footer>
+      </div>
     </main>
   );
 }
