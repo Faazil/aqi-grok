@@ -27,10 +27,10 @@ export default function HomePage() {
 
   const searchCity = () => {
     if (!search.trim()) return;
-    alert(`Search triggered for ${search}`);
+    alert(`Searching AQI for ${search}`);
   };
 
-  // simple visitor counter (frontend-only, safe)
+  // visitor counter (client-only, light)
   useEffect(() => {
     const key = 'aqiindia-visits-' + new Date().toDateString();
     const count = Number(localStorage.getItem(key) || 0) + 1;
@@ -42,22 +42,23 @@ export default function HomePage() {
   return (
     <main
       style={{
-        maxWidth: '100vw',
         minHeight: '100vh',
-        padding: '24px',
+        maxWidth: '100vw',
         overflowX: 'hidden',
-        backgroundImage: 'url(/bg.jpg)',
+        padding: '24px 28px',
+        backgroundImage: 'url(/bg.jpg)',   // ✅ background restored
         backgroundSize: 'cover',
         backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
       }}
     >
-      {/* GRID LAYOUT */}
+      {/* MAIN GRID */}
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: '280px 1fr 380px',
+          gridTemplateColumns: '260px 1fr 420px',
+          gap: 24,
           alignItems: 'start',
-          gap: 32,
         }}
       >
         {/* LEFT – TOP 5 */}
@@ -82,7 +83,7 @@ export default function HomePage() {
             </div>
           ))}
 
-          <h3 style={{ color: '#fff', margin: '22px 0 12px' }}>
+          <h3 style={{ color: '#fff', margin: '20px 0 12px' }}>
             🌿 Best AQI (Top 5)
           </h3>
           {best.map((b) => (
@@ -108,7 +109,7 @@ export default function HomePage() {
 
         {/* CENTER – LIVE AQI */}
         <div style={{ textAlign: 'center', color: '#fff' }}>
-          <h1 style={{ fontSize: 46, marginBottom: 18 }}>
+          <h1 style={{ fontSize: 48, marginBottom: 16 }}>
             Live AQI India
           </h1>
 
@@ -117,27 +118,27 @@ export default function HomePage() {
               background: '#fff',
               color: '#4f46e5',
               display: 'inline-block',
-              padding: '28px 48px',
-              borderRadius: 22,
-              boxShadow: '0 12px 30px rgba(0,0,0,0.35)',
-              marginBottom: 22,
+              padding: '32px 56px',          // ⬆ bigger
+              borderRadius: 24,
+              boxShadow: '0 14px 34px rgba(0,0,0,0.45)',
+              marginBottom: 18,
             }}
           >
-            <div style={{ fontSize: 58, fontWeight: 800 }}>
+            <div style={{ fontSize: 62, fontWeight: 800 }}>
               {nationalAverage}
             </div>
             <div style={{ fontSize: 14 }}>National Average AQI</div>
           </div>
 
-          {/* SEARCH */}
-          <div style={{ marginBottom: 12 }}>
+          {/* SEARCH BAR */}
+          <div style={{ marginBottom: 8 }}>
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search any Indian city..."
               style={{
-                width: 460,
-                maxWidth: '90%',
+                width: 520,
+                maxWidth: '95%',
                 padding: '14px 18px',
                 borderRadius: 16,
                 border: 'none',
@@ -162,35 +163,37 @@ export default function HomePage() {
             </button>
           </div>
 
-          <div style={{ fontSize: 12, opacity: 0.8 }}>
+          <div style={{ fontSize: 12, opacity: 0.85 }}>
             ● Live · Last updated 2:57 AM
           </div>
         </div>
 
-        {/* RIGHT – VERTICAL MAP */}
+        {/* RIGHT – BIGGER VERTICAL MAP */}
         <div
           style={{
-            height: '520px',
-            borderRadius: 18,
+            height: '600px',               // ⬆ bigger map
+            borderRadius: 20,
             overflow: 'hidden',
-            boxShadow: '0 12px 30px rgba(0,0,0,0.4)',
+            boxShadow: '0 16px 40px rgba(0,0,0,0.5)',
           }}
         >
           <Map />
         </div>
       </div>
 
-      {/* FOOTER */}
+      {/* VISITOR COUNT – BOTTOM CENTER */}
       <footer
         style={{
-          marginTop: 36,
-          textAlign: 'center',
-          fontSize: 12,
-          opacity: 0.65,
+          position: 'fixed',
+          bottom: 12,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          fontSize: 14,
           color: '#e5e7eb',
+          opacity: 0.9,
         }}
       >
-        👁️ Visitors today: <span id="visitor-count">—</span>
+        👁️ Visitors today: <strong id="visitor-count">—</strong>
       </footer>
     </main>
   );
