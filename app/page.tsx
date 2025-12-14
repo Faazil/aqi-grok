@@ -4,12 +4,11 @@ import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { CityData } from './components/AqiMap';
 
-const AqiMap = dynamic(
-  () => import('./components/AqiMap'),
-  { ssr: false }
-);
+const AqiMap = dynamic(() => import('./components/AqiMap'), {
+  ssr: false,
+});
 
-const CITIES: Omit<CityData, 'aqi' | 'dominant' | 'level'>[] = [
+const BASE_CITIES: Omit<CityData, 'aqi' | 'dominant' | 'level'>[] = [
   { name: 'Delhi', slug: 'delhi', lat: 28.6139, lng: 77.209 },
   { name: 'Mumbai', slug: 'mumbai', lat: 19.076, lng: 72.8777 },
   { name: 'Bengaluru', slug: 'bangalore', lat: 12.9716, lng: 77.5946 },
@@ -34,19 +33,19 @@ function getAqiLevel(aqi: number | null) {
   return 'Hazardous';
 }
 
-function getAqiGradient(aqi: number | null) {
-  if (!aqi) return 'from-gray-400 to-gray-500';
-  if (aqi <= 50) return 'from-green-400 to-green-600';
-  if (aqi <= 100) return 'from-yellow-400 to-yellow-600';
-  if (aqi <= 150) return 'from-orange-400 to-orange-600';
-  if (aqi <= 200) return 'from-red-400 to-red-600';
-  if (aqi <= 300) return 'from-purple-500 to-purple-700';
-  return 'from-gray-700 to-gray-900';
+function getAqiColor(aqi: number | null) {
+  if (!aqi) return '#6b7280';
+  if (aqi <= 50) return '#16a34a';
+  if (aqi <= 100) return '#facc15';
+  if (aqi <= 150) return '#f97316';
+  if (aqi <= 200) return '#dc2626';
+  if (aqi <= 300) return '#7c3aed';
+  return '#111827';
 }
 
 export default function Home() {
   const [cityData, setCityData] = useState<CityData[]>(
-    CITIES.map((c) => ({
+    BASE_CITIES.map((c) => ({
       ...c,
       aqi: null,
       dominant: 'PM2.5',
@@ -60,7 +59,7 @@ export default function Home() {
     if (!TOKEN) return;
 
     const fetchData = async () => {
-      const results = await Promise.all(
+      const updated = await Promise.all(
         cityData.map(async (city) => {
           try {
             const res = await fetch(
@@ -81,7 +80,7 @@ export default function Home() {
         })
       );
 
-      setCityData(results);
+      setCityData(updated);
       setLastUpdated(new Date().toLocaleTimeString());
     };
 
@@ -98,75 +97,118 @@ export default function Home() {
 
   return (
     <>
-      <header className="text-center py-24 px-6 text-white">
-        <h1 className="text-6xl font-extrabold drop-shadow-lg">
-          Live AQI India
-        </h1>
-        <p className="mt-4 text-xl text-slate-200">
+      {/* HERO */}
+      <header style={{ textAlign: 'center', padding: '80px 20px', color: '#fff' }}>
+        <h1 style={{ fontSize: 52, fontWeight: 800 }}>Live AQI India</h1>
+        <p style={{ fontSize: 20, opacity: 0.9 }}>
           Real-time Air Quality Dashboard
         </p>
 
-        <div className="mt-10 inline-flex flex-col items-center bg-white/90 rounded-3xl px-12 py-10 shadow-2xl">
-          <span className="text-7xl font-bold text-indigo-600">
+        <div
+          style={{
+            background: '#fff',
+            color: '#4f46e5',
+            display: 'inline-block',
+            padding: '30px 50px',
+            borderRadius: 24,
+            marginTop: 24,
+            boxShadow: '0 20px 40px rgba(0,0,0,0.3)',
+          }}
+        >
+          <div style={{ fontSize: 64, fontWeight: 800 }}>
             {nationalAverage}
-          </span>
-          <span className="mt-2 text-xl font-semibold text-indigo-600">
+          </div>
+          <div style={{ fontSize: 18 }}>
             {typeof nationalAverage === 'number'
               ? getAqiLevel(nationalAverage)
               : 'Loading'}
-          </span>
-          <span className="text-sm text-gray-500">
+          </div>
+          <div style={{ fontSize: 12, opacity: 0.6 }}>
             National Average AQI
-          </span>
+          </div>
         </div>
 
-        <p className="mt-6 text-sm text-slate-300 animate-pulse">
+        <p style={{ marginTop: 16, fontSize: 12, opacity: 0.8 }}>
           ● Live • Last updated {lastUpdated}
         </p>
       </header>
 
-      <section className="max-w-6xl mx-auto px-6 mb-20">
-        <div className="rounded-3xl overflow-hidden shadow-2xl">
-          <AqiMap cityData={cityData} />
+      {/* MAP */}
+      <section style={{ maxWidth: 1200, margin: '0 auto', padding: 20 }}>
+        <div
+          style={{
+            borderRadius: 20,
+            overflow: 'hidden',
+            boxShadow: '0 10px 30px rgba(0,0,0,0.4)',
+          }}
+        >
+          {typeof window !== 'undefined' && (
+            <AqiMap cityData={cityData} />
+          )}
         </div>
       </section>
 
-      <section className="max-w-7xl mx-auto px-6 pb-24">
-        <h2 className="text-3xl font-bold text-white text-center mb-12">
+      {/* CITY GRID */}
+      <section style={{ maxWidth: 1200, margin: '40px auto', padding: 20 }}>
+        <h2 style={{ color: '#fff', textAlign: 'center', fontSize: 32 }}>
           City AQI Overview
         </h2>
 
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+            gap: 24,
+            marginTop: 30,
+          }}
+        >
           {cityData.map((city) => (
             <div
               key={city.name}
-              className="rounded-3xl bg-white/20 backdrop-blur-lg shadow-xl
-                         hover:-translate-y-2 transition-all duration-300 overflow-hidden"
+              style={{
+                background: 'rgba(255,255,255,0.18)',
+                backdropFilter: 'blur(10px)',
+                borderRadius: 18,
+                overflow: 'hidden',
+                boxShadow: '0 10px 30px rgba(0,0,0,0.25)',
+              }}
             >
               <div
-                className={`h-36 flex flex-col items-center justify-center
-                text-white font-bold bg-gradient-to-br ${getAqiGradient(
-                  city.aqi
-                )}`}
+                style={{
+                  background: getAqiColor(city.aqi),
+                  color: '#fff',
+                  textAlign: 'center',
+                  padding: 30,
+                }}
               >
-                <span className="text-5xl">{city.aqi ?? '--'}</span>
-                <span className="text-lg mt-1">{city.level}</span>
+                <div style={{ fontSize: 48, fontWeight: 800 }}>
+                  {city.aqi ?? '--'}
+                </div>
+                <div>{city.level}</div>
               </div>
 
-              <div className="p-6 text-center">
-                <h3 className="text-2xl font-bold text-white">
+              <div style={{ padding: 20, textAlign: 'center', color: '#fff' }}>
+                <div style={{ fontSize: 22, fontWeight: 700 }}>
                   {city.name}
-                </h3>
-                <p className="text-slate-200 text-sm">
+                </div>
+                <div style={{ fontSize: 14, opacity: 0.85 }}>
                   {city.dominant} dominant
-                </p>
+                </div>
               </div>
             </div>
           ))}
         </div>
       </section>
 
-      <footer className="text-center text-slate-300 py-10 text-sm">
+      {/* FOOTER */}
+      <footer
+        style={{
+          textAlign: 'center',
+          color: '#e5e7eb',
+          fontSize: 12,
+          padding: '30px 10px',
+        }}
+      >
         © 2025 AQIIndia.live • Data powered by WAQI.info
       </footer>
     </>
