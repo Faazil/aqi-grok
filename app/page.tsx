@@ -90,16 +90,26 @@ export default function Home() {
   }, []);
 
   const valid = cityData.filter((c) => c.aqi !== null);
+
   const nationalAverage =
     valid.length > 0
       ? Math.round(valid.reduce((s, c) => s + (c.aqi || 0), 0) / valid.length)
       : '--';
 
+  const sorted = [...valid].sort(
+    (a, b) => (b.aqi ?? 0) - (a.aqi ?? 0)
+  );
+
+  const topWorst = sorted.slice(0, 5);
+  const topBest = [...sorted].reverse().slice(0, 5);
+
   return (
     <>
       {/* HERO */}
-      <header style={{ textAlign: 'center', padding: '80px 20px', color: '#fff' }}>
-        <h1 style={{ fontSize: 52, fontWeight: 800 }}>Live AQI India</h1>
+      <header style={{ textAlign: 'center', padding: '70px 20px', color: '#fff' }}>
+        <h1 style={{ fontSize: 52, fontWeight: 800 }}>
+          Live AQI India
+        </h1>
         <p style={{ fontSize: 20, opacity: 0.9 }}>
           Real-time Air Quality Dashboard
         </p>
@@ -109,36 +119,94 @@ export default function Home() {
             background: '#fff',
             color: '#4f46e5',
             display: 'inline-block',
-            padding: '30px 50px',
-            borderRadius: 24,
+            padding: '22px 38px',
+            borderRadius: 20,
             marginTop: 24,
-            boxShadow: '0 20px 40px rgba(0,0,0,0.3)',
+            boxShadow: '0 15px 30px rgba(0,0,0,0.25)',
           }}
         >
-          <div style={{ fontSize: 64, fontWeight: 800 }}>
+          <div style={{ fontSize: 56, fontWeight: 800 }}>
             {nationalAverage}
           </div>
-          <div style={{ fontSize: 18 }}>
+          <div style={{ fontSize: 16 }}>
             {typeof nationalAverage === 'number'
               ? getAqiLevel(nationalAverage)
               : 'Loading'}
           </div>
-          <div style={{ fontSize: 12, opacity: 0.6 }}>
+          <div style={{ fontSize: 11, opacity: 0.6 }}>
             National Average AQI
           </div>
         </div>
 
-        <p style={{ marginTop: 16, fontSize: 12, opacity: 0.8 }}>
+        <p style={{ marginTop: 14, fontSize: 12, opacity: 0.8 }}>
           ● Live • Last updated {lastUpdated}
         </p>
       </header>
 
-      {/* MAP */}
-      <section style={{ maxWidth: 1200, margin: '0 auto', padding: 20 }}>
+      {/* DASHBOARD SECTION */}
+      <section
+        style={{
+          maxWidth: 1200,
+          margin: '40px auto',
+          padding: 20,
+          display: 'grid',
+          gridTemplateColumns: '1fr 1.3fr',
+          gap: 30,
+        }}
+      >
+        {/* LEFT – TOP LISTS */}
+        <div>
+          <h3 style={{ color: '#fff', marginBottom: 12 }}>
+            🚨 Worst AQI (Top 5)
+          </h3>
+
+          {topWorst.map((city) => (
+            <div
+              key={city.name}
+              style={{
+                background: 'rgba(255,255,255,0.15)',
+                borderRadius: 14,
+                padding: '12px 16px',
+                marginBottom: 10,
+                color: '#fff',
+                display: 'flex',
+                justifyContent: 'space-between',
+              }}
+            >
+              <span>{city.name}</span>
+              <strong>{city.aqi}</strong>
+            </div>
+          ))}
+
+          <h3 style={{ color: '#fff', margin: '26px 0 12px' }}>
+            🌿 Best AQI (Top 5)
+          </h3>
+
+          {topBest.map((city) => (
+            <div
+              key={city.name}
+              style={{
+                background: 'rgba(255,255,255,0.15)',
+                borderRadius: 14,
+                padding: '12px 16px',
+                marginBottom: 10,
+                color: '#fff',
+                display: 'flex',
+                justifyContent: 'space-between',
+              }}
+            >
+              <span>{city.name}</span>
+              <strong>{city.aqi}</strong>
+            </div>
+          ))}
+        </div>
+
+        {/* RIGHT – MAP */}
         <div
           style={{
             borderRadius: 20,
             overflow: 'hidden',
+            height: 520,
             boxShadow: '0 10px 30px rgba(0,0,0,0.4)',
           }}
         >
