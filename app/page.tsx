@@ -1,7 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import AqiMap, { CityData } from './components/AqiMap';
+import dynamic from 'next/dynamic';
+import { CityData } from './components/AqiMap';
+
+const AqiMap = dynamic(
+  () => import('./components/AqiMap'),
+  { ssr: false }
+);
 
 const CITIES: Omit<CityData, 'aqi' | 'dominant' | 'level'>[] = [
   { name: 'Delhi', slug: 'delhi', lat: 28.6139, lng: 77.209 },
