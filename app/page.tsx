@@ -32,10 +32,10 @@ function getAqiLevel(aqi: number | null) {
 }
 
 function getAqiColor(aqi: number | null) {
-  if (!aqi) return '#6b7280';
+  if (!aqi) return '#374151';
   if (aqi <= 50) return '#16a34a';
   if (aqi <= 100) return '#facc15';
-  if (aqi <= 150) return '#f97316';
+  if (aqi <= 150) return '#fb923c';
   if (aqi <= 200) return '#dc2626';
   if (aqi <= 300) return '#7c3aed';
   return '#111827';
@@ -79,12 +79,13 @@ export default function Home() {
           }
         })
       );
+
       setCityData(updated);
       setLastUpdated(new Date().toLocaleTimeString());
     };
 
     fetchData();
-    const interval = setInterval(fetchData, 5 * 60 * 1000);
+    const interval = setInterval(fetchData, 300000);
     return () => clearInterval(interval);
   }, []);
 
@@ -109,133 +110,143 @@ export default function Home() {
 
   return (
     <>
-      {/* TOP DASHBOARD */}
+      {/* DASHBOARD GRID */}
       <section
         style={{
-          maxWidth: 1200,
+          maxWidth: 1400,
           margin: '0 auto',
           padding: 20,
           display: 'grid',
-          gridTemplateColumns: '1fr 1.4fr',
-          gap: 30,
+          gridTemplateColumns: '360px 1fr 360px',
+          gap: 24,
+          alignItems: 'start',
         }}
       >
-        {/* LEFT – TOP 5 CARDS */}
+        {/* LEFT COLUMN */}
         <div>
           <h3 style={{ color: '#fff' }}>🚨 Worst AQI (Top 5)</h3>
-          <div style={{ display: 'grid', gap: 12 }}>
-            {topWorst.map((c) => (
-              <div
-                key={c.name}
-                style={{
-                  background: getAqiColor(c.aqi),
-                  color: '#fff',
-                  borderRadius: 14,
-                  padding: '14px 18px',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  fontWeight: 700,
-                }}
-              >
-                <span>{c.name}</span>
-                <span>{c.aqi}</span>
-              </div>
-            ))}
-          </div>
+          {topWorst.map((c) => (
+            <div
+              key={c.name}
+              style={{
+                background: getAqiColor(c.aqi),
+                color: '#fff',
+                borderRadius: 14,
+                padding: '14px 18px',
+                marginBottom: 10,
+                display: 'flex',
+                justifyContent: 'space-between',
+                fontWeight: 700,
+              }}
+            >
+              <span>{c.name}</span>
+              <span>{c.aqi}</span>
+            </div>
+          ))}
 
-          <h3 style={{ color: '#fff', marginTop: 22 }}>
+          <h3 style={{ color: '#fff', marginTop: 24 }}>
             🌿 Best AQI (Top 5)
           </h3>
-          <div style={{ display: 'grid', gap: 12 }}>
-            {topBest.map((c) => (
-              <div
-                key={c.name}
-                style={{
-                  background: getAqiColor(c.aqi),
-                  color: '#fff',
-                  borderRadius: 14,
-                  padding: '14px 18px',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  fontWeight: 700,
-                }}
-              >
-                <span>{c.name}</span>
-                <span>{c.aqi}</span>
-              </div>
-            ))}
-          </div>
+          {topBest.map((c) => (
+            <div
+              key={c.name}
+              style={{
+                background: getAqiColor(c.aqi),
+                color: '#fff',
+                borderRadius: 14,
+                padding: '14px 18px',
+                marginBottom: 10,
+                display: 'flex',
+                justifyContent: 'space-between',
+                fontWeight: 700,
+              }}
+            >
+              <span>{c.name}</span>
+              <span>{c.aqi}</span>
+            </div>
+          ))}
         </div>
 
-        {/* RIGHT – MAP */}
-        <div
-          style={{
-            height: 420,
-            borderRadius: 18,
-            overflow: 'hidden',
-            boxShadow: '0 10px 30px rgba(0,0,0,0.4)',
-          }}
-        >
-          <AqiMap cityData={cityData} />
-        </div>
-      </section>
-
-      {/* CENTER INFO */}
-      <section style={{ textAlign: 'center', color: '#fff', marginTop: 30 }}>
-        <h1 style={{ fontSize: 38, fontWeight: 800 }}>Live AQI India</h1>
-
-        <div
-          style={{
-            background: '#fff',
-            color: '#4f46e5',
-            display: 'inline-block',
-            padding: '18px 32px',
-            borderRadius: 18,
-            marginTop: 14,
-          }}
-        >
-          <div style={{ fontSize: 44, fontWeight: 800 }}>
-            {nationalAverage}
-          </div>
-          <div style={{ fontSize: 13 }}>National Average AQI</div>
-        </div>
-
-        {/* SEARCH */}
-        <div style={{ marginTop: 18 }}>
-          <input
-            placeholder="Search any Indian city..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+        {/* CENTER COLUMN */}
+        <div>
+          <div
             style={{
-              padding: '10px 14px',
-              borderRadius: 12,
-              border: 'none',
-              width: 260,
-            }}
-          />
-          <button
-            onClick={searchCity}
-            style={{
-              marginLeft: 8,
-              padding: '10px 18px',
-              borderRadius: 12,
-              border: 'none',
-              cursor: 'pointer',
+              position: 'relative',
+              height: 420,
+              borderRadius: 20,
+              overflow: 'hidden',
+              boxShadow: '0 10px 30px rgba(0,0,0,0.4)',
             }}
           >
-            Search
-          </button>
+            <AqiMap cityData={cityData} />
+
+            {/* OVERLAY */}
+            <div
+              style={{
+                position: 'absolute',
+                left: 20,
+                bottom: 20,
+                background: 'rgba(255,255,255,0.95)',
+                padding: '16px 20px',
+                borderRadius: 16,
+                textAlign: 'center',
+                width: 220,
+              }}
+            >
+              <div style={{ fontSize: 26, fontWeight: 800 }}>
+                Live AQI India
+              </div>
+              <div style={{ fontSize: 42, fontWeight: 800, color: '#4f46e5' }}>
+                {nationalAverage}
+              </div>
+              <div style={{ fontSize: 12, opacity: 0.7 }}>
+                National Average AQI
+              </div>
+
+              <div style={{ marginTop: 10 }}>
+                <input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search city…"
+                  style={{
+                    width: '100%',
+                    padding: '8px 10px',
+                    borderRadius: 10,
+                    border: '1px solid #ddd',
+                  }}
+                />
+                <button
+                  onClick={searchCity}
+                  style={{
+                    marginTop: 6,
+                    width: '100%',
+                    padding: '8px',
+                    borderRadius: 10,
+                    border: 'none',
+                    background: '#4f46e5',
+                    color: '#fff',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Search
+                </button>
+              </div>
+
+              {searchResult && (
+                <div style={{ marginTop: 6, fontSize: 12 }}>
+                  {searchResult.city.name} — AQI {searchResult.aqi}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div style={{ fontSize: 12, color: '#fff', marginTop: 8 }}>
+            ● Live • Last updated {lastUpdated}
+          </div>
         </div>
 
-        {searchResult && (
-          <div style={{ marginTop: 12 }}>
-            {searchResult.city.name} — AQI {searchResult.aqi}
-          </div>
-        )}
-
-        <p style={{ fontSize: 12, opacity: 0.8, marginTop: 10 }}>
-          ● Live • Last updated {lastUpdated}
-        </p>
+        {/* RIGHT COLUMN (INTENTIONAL EMPTY SPACE) */}
+        <div />
       </section>
     </>
   );
