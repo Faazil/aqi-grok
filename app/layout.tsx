@@ -4,8 +4,7 @@ import 'leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility
 
 export const metadata: Metadata = {
   title: 'Live AQI India – Real-Time Air Quality Index',
-  description:
-    'Live AQI across Indian cities in India. Search air quality by city with real-time data.',
+  description: 'Live AQI across Indian cities with real-time map and search.',
 };
 
 export default function RootLayout({
@@ -32,7 +31,7 @@ export default function RootLayout({
             minHeight: '100vh',
             background: 'rgba(0,0,0,0.45)',
             backdropFilter: 'blur(6px)',
-            paddingTop: 16, // 👈 slight gap from browser top
+            paddingTop: 16,
           }}
         >
           {children}
