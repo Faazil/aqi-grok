@@ -87,17 +87,20 @@ export default function Home() {
 
   return (
     <main style={{ maxWidth: 1400, margin: '0 auto', padding: 24 }}>
-      {/* HEADER */}
+      {/* TOP HEADER GRID */}
       <section
         style={{
           display: 'grid',
-          gridTemplateColumns: '1fr 1.4fr',
+          gridTemplateColumns: '1fr auto 1.4fr',
           gap: 24,
           alignItems: 'center',
         }}
       >
-        {/* LIVE AQI */}
-        <div style={{ color: '#fff' }}>
+        {/* LEFT SPACER */}
+        <div />
+
+        {/* CENTER: LIVE AQI */}
+        <div style={{ textAlign: 'center', color: '#fff' }}>
           <h1 style={{ fontSize: 38, marginBottom: 10 }}>
             Live AQI India
           </h1>
@@ -107,27 +110,27 @@ export default function Home() {
               background: '#fff',
               color: '#4f46e5',
               display: 'inline-block',
-              padding: '16px 28px',
-              borderRadius: 16,
+              padding: '18px 32px',
+              borderRadius: 18,
               marginBottom: 14,
             }}
           >
-            <div style={{ fontSize: 42, fontWeight: 800 }}>
+            <div style={{ fontSize: 44, fontWeight: 800 }}>
               {nationalAverage}
             </div>
             <div style={{ fontSize: 12 }}>National Average AQI</div>
           </div>
 
-          {/* SEARCH */}
-          <div>
+          {/* LONG SEARCH BAR */}
+          <div style={{ marginTop: 10 }}>
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search any Indian city..."
               style={{
-                width: 260,
-                padding: '10px 12px',
-                borderRadius: 12,
+                width: 360,
+                padding: '12px 14px',
+                borderRadius: 14,
                 border: 'none',
               }}
             />
@@ -135,8 +138,8 @@ export default function Home() {
               onClick={searchCity}
               style={{
                 marginLeft: 8,
-                padding: '10px 16px',
-                borderRadius: 12,
+                padding: '12px 20px',
+                borderRadius: 14,
                 border: 'none',
                 background: '#4f46e5',
                 color: '#fff',
@@ -157,11 +160,11 @@ export default function Home() {
           </p>
         </div>
 
-        {/* MAP */}
+        {/* RIGHT: MAP */}
         <div
           style={{
             height: 420,
-            borderRadius: 20,
+            borderRadius: 22,
             overflow: 'hidden',
             boxShadow: '0 10px 30px rgba(0,0,0,0.4)',
           }}
@@ -171,12 +174,7 @@ export default function Home() {
       </section>
 
       {/* WORST + BEST */}
-      <section
-        style={{
-          marginTop: 40,
-          maxWidth: 420,
-        }}
-      >
+      <section style={{ marginTop: 40, maxWidth: 420 }}>
         <h3 style={{ color: '#fff' }}>🚨 Worst AQI (Top 5)</h3>
         {topWorst.map((c) => (
           <div
