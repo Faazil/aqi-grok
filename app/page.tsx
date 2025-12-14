@@ -86,17 +86,17 @@ export default function Home() {
   };
 
   return (
-    <main style={{ maxWidth: 1400, margin: '0 auto', padding: 24 }}>
-      {/* TOP GRID */}
+    <main style={{ width: '100%', padding: '24px 32px' }}>
+      {/* FULL WIDTH TOP GRID */}
       <section
         style={{
           display: 'grid',
-          gridTemplateColumns: '420px auto 1.4fr',
-          gap: 24,
+          gridTemplateColumns: '420px minmax(420px, 1fr) 520px',
           alignItems: 'start',
+          gap: 24,
         }}
       >
-        {/* LEFT: TOP 5 */}
+        {/* LEFT – EXTREME LEFT */}
         <div>
           <h3 style={{ color: '#fff' }}>🚨 Worst AQI (Top 5)</h3>
           {topWorst.map((c) => (
@@ -141,8 +141,8 @@ export default function Home() {
           ))}
         </div>
 
-        {/* CENTER: LIVE AQI */}
-        <div style={{ textAlign: 'center', color: '#fff', paddingTop: 20 }}>
+        {/* CENTER – NO CHANGE */}
+        <div style={{ textAlign: 'center', color: '#fff', paddingTop: 16 }}>
           <h1 style={{ fontSize: 38, marginBottom: 12 }}>
             Live AQI India
           </h1>
@@ -201,7 +201,7 @@ export default function Home() {
           </p>
         </div>
 
-        {/* RIGHT: MAP */}
+        {/* RIGHT – EXTREME RIGHT */}
         <div
           style={{
             height: 420,
