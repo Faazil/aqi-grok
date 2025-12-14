@@ -114,4 +114,82 @@ export default function Home() {
       {/* HERO */}
       <header className="text-center py-24 px-6">
         <h1 className="text-5xl md:text-6xl font-extrabold text-white drop-shadow-lg">
-          L
+          Live AQI India
+        </h1>
+        <p className="mt-4 text-xl text-slate-200">
+          Real-time Air Quality Dashboard
+        </p>
+
+        <div className="mt-10 inline-flex flex-col items-center bg-white/90 rounded-3xl px-12 py-10 shadow-2xl">
+          <span className="text-7xl font-bold text-indigo-600">
+            {nationalAverage}
+          </span>
+          <span className="mt-2 text-xl font-semibold text-indigo-600">
+            {typeof nationalAverage === 'number'
+              ? getAqiLevel(nationalAverage)
+              : 'Loading'}
+          </span>
+          <span className="mt-1 text-sm text-gray-500">
+            National Average AQI
+          </span>
+        </div>
+
+        <p className="mt-6 text-sm text-slate-300 animate-pulse">
+          ● Live • Last updated {lastUpdated}
+        </p>
+      </header>
+
+      {/* MAP */}
+      <section className="max-w-6xl mx-auto px-6 mb-20">
+        <div className="rounded-3xl overflow-hidden shadow-2xl">
+          <AqiMap cityData={cityData} />
+        </div>
+      </section>
+
+      {/* CITY CARDS */}
+      <section className="max-w-7xl mx-auto px-6 pb-24">
+        <h2 className="text-3xl font-bold text-white text-center mb-12">
+          City AQI Overview
+        </h2>
+
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+          {cityData.map((city) => (
+            <div
+              key={city.name}
+              className="rounded-3xl bg-white/20 backdrop-blur-lg shadow-xl
+                         hover:-translate-y-2 transition-all duration-300 overflow-hidden"
+            >
+              <div
+                className={`h-36 flex flex-col items-center justify-center
+                text-white font-bold bg-gradient-to-br ${getAqiGradient(
+                  city.aqi
+                )}`}
+              >
+                <span className="text-5xl">
+                  {city.aqi ?? '--'}
+                </span>
+                <span className="text-lg mt-1">
+                  {city.level}
+                </span>
+              </div>
+
+              <div className="p-6 text-center">
+                <h3 className="text-2xl font-bold text-white">
+                  {city.name}
+                </h3>
+                <p className="mt-1 text-slate-200 text-sm">
+                  {city.dominant} dominant
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* FOOTER */}
+      <footer className="text-center text-slate-300 py-10 text-sm">
+        © 2025 AQIIndia.live • Data powered by WAQI.info
+      </footer>
+    </>
+  );
+}
