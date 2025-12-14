@@ -40,7 +40,7 @@ export default function HomePage() {
         width: '100%',
         overflowX: 'hidden',
         padding: '28px',
-        backgroundImage: 'url("/bg.jpg")',   // ✅ WILL WORK
+        backgroundImage: 'linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.65)), url("https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1920&q=80")',   // ✅ WILL WORK
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
