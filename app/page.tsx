@@ -4,9 +4,7 @@ import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { CityData } from './components/AqiMap';
 
-const AqiMap = dynamic(() => import('./components/AqiMap'), {
-  ssr: false,
-});
+const AqiMap = dynamic(() => import('./components/AqiMap'), { ssr: false });
 
 const BASE_CITIES: Omit<CityData, 'aqi' | 'dominant' | 'level'>[] = [
   { name: 'Delhi', slug: 'delhi', lat: 28.6139, lng: 77.209 },
@@ -27,10 +25,20 @@ function getAqiLevel(aqi: number | null) {
   if (!aqi) return '—';
   if (aqi <= 50) return 'Good';
   if (aqi <= 100) return 'Moderate';
-  if (aqi <= 150) return 'Unhealthy for Sensitive';
+  if (aqi <= 150) return 'Unhealthy (Sensitive)';
   if (aqi <= 200) return 'Unhealthy';
   if (aqi <= 300) return 'Very Unhealthy';
   return 'Hazardous';
+}
+
+function getAqiColor(aqi: number | null) {
+  if (!aqi) return '#6b7280';
+  if (aqi <= 50) return '#16a34a';
+  if (aqi <= 100) return '#facc15';
+  if (aqi <= 150) return '#f97316';
+  if (aqi <= 200) return '#dc2626';
+  if (aqi <= 300) return '#7c3aed';
+  return '#111827';
 }
 
 export default function Home() {
@@ -43,9 +51,9 @@ export default function Home() {
     }))
   );
 
-  const [lastUpdated, setLastUpdated] = useState('—');
   const [search, setSearch] = useState('');
   const [searchResult, setSearchResult] = useState<any>(null);
+  const [lastUpdated, setLastUpdated] = useState('—');
 
   useEffect(() => {
     if (!TOKEN) return;
@@ -71,7 +79,6 @@ export default function Home() {
           }
         })
       );
-
       setCityData(updated);
       setLastUpdated(new Date().toLocaleTimeString());
     };
@@ -83,7 +90,6 @@ export default function Home() {
 
   const valid = cityData.filter((c) => c.aqi !== null);
   const sorted = [...valid].sort((a, b) => (b.aqi ?? 0) - (a.aqi ?? 0));
-
   const topWorst = sorted.slice(0, 5);
   const topBest = [...sorted].reverse().slice(0, 5);
 
@@ -110,28 +116,58 @@ export default function Home() {
           margin: '0 auto',
           padding: 20,
           display: 'grid',
-          gridTemplateColumns: '1fr 1.3fr',
+          gridTemplateColumns: '1fr 1.4fr',
           gap: 30,
         }}
       >
-        {/* LEFT */}
-        <div style={{ color: '#fff' }}>
-          <h3>🚨 Worst AQI (Top 5)</h3>
-          {topWorst.map((c) => (
-            <div key={c.name} style={{ opacity: 0.9 }}>
-              {c.name} — {c.aqi}
-            </div>
-          ))}
+        {/* LEFT – TOP 5 CARDS */}
+        <div>
+          <h3 style={{ color: '#fff' }}>🚨 Worst AQI (Top 5)</h3>
+          <div style={{ display: 'grid', gap: 12 }}>
+            {topWorst.map((c) => (
+              <div
+                key={c.name}
+                style={{
+                  background: getAqiColor(c.aqi),
+                  color: '#fff',
+                  borderRadius: 14,
+                  padding: '14px 18px',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  fontWeight: 700,
+                }}
+              >
+                <span>{c.name}</span>
+                <span>{c.aqi}</span>
+              </div>
+            ))}
+          </div>
 
-          <h3 style={{ marginTop: 20 }}>🌿 Best AQI (Top 5)</h3>
-          {topBest.map((c) => (
-            <div key={c.name} style={{ opacity: 0.9 }}>
-              {c.name} — {c.aqi}
-            </div>
-          ))}
+          <h3 style={{ color: '#fff', marginTop: 22 }}>
+            🌿 Best AQI (Top 5)
+          </h3>
+          <div style={{ display: 'grid', gap: 12 }}>
+            {topBest.map((c) => (
+              <div
+                key={c.name}
+                style={{
+                  background: getAqiColor(c.aqi),
+                  color: '#fff',
+                  borderRadius: 14,
+                  padding: '14px 18px',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  fontWeight: 700,
+                }}
+              >
+                <span>{c.name}</span>
+                <span>{c.aqi}</span>
+              </div>
+            ))}
+          </div>
         </div>
 
-        {/* RIGHT MAP */}
+        {/* RIGHT – MAP */}
         <div
           style={{
             height: 420,
@@ -146,26 +182,26 @@ export default function Home() {
 
       {/* CENTER INFO */}
       <section style={{ textAlign: 'center', color: '#fff', marginTop: 30 }}>
-        <h1 style={{ fontSize: 40, fontWeight: 800 }}>Live AQI India</h1>
+        <h1 style={{ fontSize: 38, fontWeight: 800 }}>Live AQI India</h1>
 
         <div
           style={{
             background: '#fff',
             color: '#4f46e5',
             display: 'inline-block',
-            padding: '18px 30px',
+            padding: '18px 32px',
             borderRadius: 18,
-            marginTop: 12,
+            marginTop: 14,
           }}
         >
-          <div style={{ fontSize: 46, fontWeight: 800 }}>
+          <div style={{ fontSize: 44, fontWeight: 800 }}>
             {nationalAverage}
           </div>
-          <div style={{ fontSize: 14 }}>National Average AQI</div>
+          <div style={{ fontSize: 13 }}>National Average AQI</div>
         </div>
 
         {/* SEARCH */}
-        <div style={{ marginTop: 20 }}>
+        <div style={{ marginTop: 18 }}>
           <input
             placeholder="Search any Indian city..."
             value={search}
@@ -181,7 +217,7 @@ export default function Home() {
             onClick={searchCity}
             style={{
               marginLeft: 8,
-              padding: '10px 16px',
+              padding: '10px 18px',
               borderRadius: 12,
               border: 'none',
               cursor: 'pointer',
