@@ -17,7 +17,6 @@ export default function RootLayout({
           margin: 0,
           padding: 0,
           overflowX: 'hidden',
-          boxSizing: 'border-box',
           backgroundColor: '#000',
         }}
       >
