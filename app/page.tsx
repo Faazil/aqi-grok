@@ -24,7 +24,7 @@ const BASE_CITIES: Omit<CityData, 'aqi' | 'dominant' | 'level'>[] = [
 const TOKEN = process.env.NEXT_PUBLIC_WAQI_TOKEN;
 
 function getAqiLevel(aqi: number | null) {
-  if (!aqi) return 'Loading';
+  if (!aqi) return '—';
   if (aqi <= 50) return 'Good';
   if (aqi <= 100) return 'Moderate';
   if (aqi <= 150) return 'Unhealthy for Sensitive';
@@ -33,27 +33,19 @@ function getAqiLevel(aqi: number | null) {
   return 'Hazardous';
 }
 
-function getAqiColor(aqi: number | null) {
-  if (!aqi) return '#6b7280';
-  if (aqi <= 50) return '#16a34a';
-  if (aqi <= 100) return '#facc15';
-  if (aqi <= 150) return '#f97316';
-  if (aqi <= 200) return '#dc2626';
-  if (aqi <= 300) return '#7c3aed';
-  return '#111827';
-}
-
 export default function Home() {
   const [cityData, setCityData] = useState<CityData[]>(
     BASE_CITIES.map((c) => ({
       ...c,
       aqi: null,
       dominant: 'PM2.5',
-      level: 'Loading',
+      level: '—',
     }))
   );
 
   const [lastUpdated, setLastUpdated] = useState('—');
+  const [search, setSearch] = useState('');
+  const [searchResult, setSearchResult] = useState<any>(null);
 
   useEffect(() => {
     if (!TOKEN) return;
@@ -90,195 +82,125 @@ export default function Home() {
   }, []);
 
   const valid = cityData.filter((c) => c.aqi !== null);
+  const sorted = [...valid].sort((a, b) => (b.aqi ?? 0) - (a.aqi ?? 0));
+
+  const topWorst = sorted.slice(0, 5);
+  const topBest = [...sorted].reverse().slice(0, 5);
 
   const nationalAverage =
     valid.length > 0
       ? Math.round(valid.reduce((s, c) => s + (c.aqi || 0), 0) / valid.length)
       : '--';
 
-  const sorted = [...valid].sort(
-    (a, b) => (b.aqi ?? 0) - (a.aqi ?? 0)
-  );
-
-  const topWorst = sorted.slice(0, 5);
-  const topBest = [...sorted].reverse().slice(0, 5);
+  const searchCity = async () => {
+    if (!search) return;
+    const res = await fetch(
+      `https://api.waqi.info/feed/${search}/?token=${TOKEN}`
+    );
+    const json = await res.json();
+    setSearchResult(json.status === 'ok' ? json.data : null);
+  };
 
   return (
     <>
-      {/* HERO */}
-      <header style={{ textAlign: 'center', padding: '70px 20px', color: '#fff' }}>
-        <h1 style={{ fontSize: 52, fontWeight: 800 }}>
-          Live AQI India
-        </h1>
-        <p style={{ fontSize: 20, opacity: 0.9 }}>
-          Real-time Air Quality Dashboard
-        </p>
-
-        <div
-          style={{
-            background: '#fff',
-            color: '#4f46e5',
-            display: 'inline-block',
-            padding: '22px 38px',
-            borderRadius: 20,
-            marginTop: 24,
-            boxShadow: '0 15px 30px rgba(0,0,0,0.25)',
-          }}
-        >
-          <div style={{ fontSize: 56, fontWeight: 800 }}>
-            {nationalAverage}
-          </div>
-          <div style={{ fontSize: 16 }}>
-            {typeof nationalAverage === 'number'
-              ? getAqiLevel(nationalAverage)
-              : 'Loading'}
-          </div>
-          <div style={{ fontSize: 11, opacity: 0.6 }}>
-            National Average AQI
-          </div>
-        </div>
-
-        <p style={{ marginTop: 14, fontSize: 12, opacity: 0.8 }}>
-          ● Live • Last updated {lastUpdated}
-        </p>
-      </header>
-
-      {/* DASHBOARD SECTION */}
+      {/* TOP DASHBOARD */}
       <section
         style={{
           maxWidth: 1200,
-          margin: '40px auto',
+          margin: '0 auto',
           padding: 20,
           display: 'grid',
           gridTemplateColumns: '1fr 1.3fr',
           gap: 30,
         }}
       >
-        {/* LEFT – TOP LISTS */}
-        <div>
-          <h3 style={{ color: '#fff', marginBottom: 12 }}>
-            🚨 Worst AQI (Top 5)
-          </h3>
-
-          {topWorst.map((city) => (
-            <div
-              key={city.name}
-              style={{
-                background: 'rgba(255,255,255,0.15)',
-                borderRadius: 14,
-                padding: '12px 16px',
-                marginBottom: 10,
-                color: '#fff',
-                display: 'flex',
-                justifyContent: 'space-between',
-              }}
-            >
-              <span>{city.name}</span>
-              <strong>{city.aqi}</strong>
+        {/* LEFT */}
+        <div style={{ color: '#fff' }}>
+          <h3>🚨 Worst AQI (Top 5)</h3>
+          {topWorst.map((c) => (
+            <div key={c.name} style={{ opacity: 0.9 }}>
+              {c.name} — {c.aqi}
             </div>
           ))}
 
-          <h3 style={{ color: '#fff', margin: '26px 0 12px' }}>
-            🌿 Best AQI (Top 5)
-          </h3>
-
-          {topBest.map((city) => (
-            <div
-              key={city.name}
-              style={{
-                background: 'rgba(255,255,255,0.15)',
-                borderRadius: 14,
-                padding: '12px 16px',
-                marginBottom: 10,
-                color: '#fff',
-                display: 'flex',
-                justifyContent: 'space-between',
-              }}
-            >
-              <span>{city.name}</span>
-              <strong>{city.aqi}</strong>
+          <h3 style={{ marginTop: 20 }}>🌿 Best AQI (Top 5)</h3>
+          {topBest.map((c) => (
+            <div key={c.name} style={{ opacity: 0.9 }}>
+              {c.name} — {c.aqi}
             </div>
           ))}
         </div>
 
-        {/* RIGHT – MAP */}
+        {/* RIGHT MAP */}
         <div
           style={{
-            borderRadius: 20,
+            height: 420,
+            borderRadius: 18,
             overflow: 'hidden',
-            height: 520,
             boxShadow: '0 10px 30px rgba(0,0,0,0.4)',
           }}
         >
-          {typeof window !== 'undefined' && (
-            <AqiMap cityData={cityData} />
-          )}
+          <AqiMap cityData={cityData} />
         </div>
       </section>
 
-      {/* CITY GRID */}
-      <section style={{ maxWidth: 1200, margin: '40px auto', padding: 20 }}>
-        <h2 style={{ color: '#fff', textAlign: 'center', fontSize: 32 }}>
-          City AQI Overview
-        </h2>
+      {/* CENTER INFO */}
+      <section style={{ textAlign: 'center', color: '#fff', marginTop: 30 }}>
+        <h1 style={{ fontSize: 40, fontWeight: 800 }}>Live AQI India</h1>
 
         <div
           style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-            gap: 24,
-            marginTop: 30,
+            background: '#fff',
+            color: '#4f46e5',
+            display: 'inline-block',
+            padding: '18px 30px',
+            borderRadius: 18,
+            marginTop: 12,
           }}
         >
-          {cityData.map((city) => (
-            <div
-              key={city.name}
-              style={{
-                background: 'rgba(255,255,255,0.18)',
-                backdropFilter: 'blur(10px)',
-                borderRadius: 18,
-                overflow: 'hidden',
-                boxShadow: '0 10px 30px rgba(0,0,0,0.25)',
-              }}
-            >
-              <div
-                style={{
-                  background: getAqiColor(city.aqi),
-                  color: '#fff',
-                  textAlign: 'center',
-                  padding: 30,
-                }}
-              >
-                <div style={{ fontSize: 48, fontWeight: 800 }}>
-                  {city.aqi ?? '--'}
-                </div>
-                <div>{city.level}</div>
-              </div>
-
-              <div style={{ padding: 20, textAlign: 'center', color: '#fff' }}>
-                <div style={{ fontSize: 22, fontWeight: 700 }}>
-                  {city.name}
-                </div>
-                <div style={{ fontSize: 14, opacity: 0.85 }}>
-                  {city.dominant} dominant
-                </div>
-              </div>
-            </div>
-          ))}
+          <div style={{ fontSize: 46, fontWeight: 800 }}>
+            {nationalAverage}
+          </div>
+          <div style={{ fontSize: 14 }}>National Average AQI</div>
         </div>
-      </section>
 
-      {/* FOOTER */}
-      <footer
-        style={{
-          textAlign: 'center',
-          color: '#e5e7eb',
-          fontSize: 12,
-          padding: '30px 10px',
-        }}
-      >
-        © 2025 AQIIndia.live • Data powered by WAQI.info
-      </footer>
+        {/* SEARCH */}
+        <div style={{ marginTop: 20 }}>
+          <input
+            placeholder="Search any Indian city..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            style={{
+              padding: '10px 14px',
+              borderRadius: 12,
+              border: 'none',
+              width: 260,
+            }}
+          />
+          <button
+            onClick={searchCity}
+            style={{
+              marginLeft: 8,
+              padding: '10px 16px',
+              borderRadius: 12,
+              border: 'none',
+              cursor: 'pointer',
+            }}
+          >
+            Search
+          </button>
+        </div>
+
+        {searchResult && (
+          <div style={{ marginTop: 12 }}>
+            {searchResult.city.name} — AQI {searchResult.aqi}
+          </div>
+        )}
+
+        <p style={{ fontSize: 12, opacity: 0.8, marginTop: 10 }}>
+          ● Live • Last updated {lastUpdated}
+        </p>
+      </section>
     </>
   );
 }
