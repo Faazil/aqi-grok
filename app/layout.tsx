@@ -2,7 +2,7 @@ import './globals.css';
 
 export const metadata = {
   title: 'Live AQI India',
-  description: 'Real-time Air Quality Index across Indian cities',
+  description: 'Real-time Air Quality Index across India',
 };
 
 export default function RootLayout({
@@ -18,7 +18,7 @@ export default function RootLayout({
           padding: 0,
           overflowX: 'hidden',
           boxSizing: 'border-box',
-          background: '#000',
+          backgroundColor: '#000',
         }}
       >
         {children}
