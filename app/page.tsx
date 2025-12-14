@@ -21,7 +21,7 @@ const BASE_CITIES: Omit<CityData, 'aqi' | 'dominant' | 'level'>[] = [
 
 const TOKEN = process.env.NEXT_PUBLIC_WAQI_TOKEN;
 
-function getAqiColor(aqi: number | null) {
+function aqiColor(aqi: number | null) {
   if (!aqi) return '#374151';
   if (aqi <= 50) return '#16a34a';
   if (aqi <= 100) return '#facc15';
@@ -87,21 +87,63 @@ export default function Home() {
 
   return (
     <main style={{ maxWidth: 1400, margin: '0 auto', padding: 24 }}>
-      {/* TOP HEADER GRID */}
+      {/* TOP GRID */}
       <section
         style={{
           display: 'grid',
-          gridTemplateColumns: '1fr auto 1.4fr',
+          gridTemplateColumns: '420px auto 1.4fr',
           gap: 24,
-          alignItems: 'center',
+          alignItems: 'start',
         }}
       >
-        {/* LEFT SPACER */}
-        <div />
+        {/* LEFT: TOP 5 */}
+        <div>
+          <h3 style={{ color: '#fff' }}>🚨 Worst AQI (Top 5)</h3>
+          {topWorst.map((c) => (
+            <div
+              key={c.name}
+              style={{
+                background: aqiColor(c.aqi),
+                color: '#fff',
+                borderRadius: 14,
+                padding: '14px 18px',
+                marginBottom: 10,
+                display: 'flex',
+                justifyContent: 'space-between',
+                fontWeight: 700,
+              }}
+            >
+              <span>{c.name}</span>
+              <span>{c.aqi}</span>
+            </div>
+          ))}
+
+          <h3 style={{ color: '#fff', marginTop: 24 }}>
+            🌿 Best AQI (Top 5)
+          </h3>
+          {topBest.map((c) => (
+            <div
+              key={c.name}
+              style={{
+                background: aqiColor(c.aqi),
+                color: '#fff',
+                borderRadius: 14,
+                padding: '14px 18px',
+                marginBottom: 10,
+                display: 'flex',
+                justifyContent: 'space-between',
+                fontWeight: 700,
+              }}
+            >
+              <span>{c.name}</span>
+              <span>{c.aqi}</span>
+            </div>
+          ))}
+        </div>
 
         {/* CENTER: LIVE AQI */}
-        <div style={{ textAlign: 'center', color: '#fff' }}>
-          <h1 style={{ fontSize: 38, marginBottom: 10 }}>
+        <div style={{ textAlign: 'center', color: '#fff', paddingTop: 20 }}>
+          <h1 style={{ fontSize: 38, marginBottom: 12 }}>
             Live AQI India
           </h1>
 
@@ -121,8 +163,7 @@ export default function Home() {
             <div style={{ fontSize: 12 }}>National Average AQI</div>
           </div>
 
-          {/* LONG SEARCH BAR */}
-          <div style={{ marginTop: 10 }}>
+          <div>
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -155,7 +196,7 @@ export default function Home() {
             </div>
           )}
 
-          <p style={{ fontSize: 12, opacity: 0.8, marginTop: 8 }}>
+          <p style={{ fontSize: 12, opacity: 0.8, marginTop: 10 }}>
             ● Live • Last updated {lastUpdated}
           </p>
         </div>
@@ -171,51 +212,6 @@ export default function Home() {
         >
           <AqiMap cityData={cityData} />
         </div>
-      </section>
-
-      {/* WORST + BEST */}
-      <section style={{ marginTop: 40, maxWidth: 420 }}>
-        <h3 style={{ color: '#fff' }}>🚨 Worst AQI (Top 5)</h3>
-        {topWorst.map((c) => (
-          <div
-            key={c.name}
-            style={{
-              background: getAqiColor(c.aqi),
-              color: '#fff',
-              borderRadius: 14,
-              padding: '14px 18px',
-              marginBottom: 10,
-              display: 'flex',
-              justifyContent: 'space-between',
-              fontWeight: 700,
-            }}
-          >
-            <span>{c.name}</span>
-            <span>{c.aqi}</span>
-          </div>
-        ))}
-
-        <h3 style={{ color: '#fff', marginTop: 24 }}>
-          🌿 Best AQI (Top 5)
-        </h3>
-        {topBest.map((c) => (
-          <div
-            key={c.name}
-            style={{
-              background: getAqiColor(c.aqi),
-              color: '#fff',
-              borderRadius: 14,
-              padding: '14px 18px',
-              marginBottom: 10,
-              display: 'flex',
-              justifyContent: 'space-between',
-              fontWeight: 700,
-            }}
-          >
-            <span>{c.name}</span>
-            <span>{c.aqi}</span>
-          </div>
-        ))}
       </section>
     </main>
   );
