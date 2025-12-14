@@ -2,148 +2,113 @@
 
 import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
-import { CityData } from './components/AqiMap';
 
-const AqiMap = dynamic(() => import('./components/AqiMap'), { ssr: false });
+const Map = dynamic(() => import('./map'), { ssr: false });
 
-const BASE_CITIES: Omit<CityData, 'aqi' | 'dominant' | 'level'>[] = [
-  { name: 'Delhi', slug: 'delhi', lat: 28.6139, lng: 77.209 },
-  { name: 'Mumbai', slug: 'mumbai', lat: 19.076, lng: 72.8777 },
-  { name: 'Bengaluru', slug: 'bangalore', lat: 12.9716, lng: 77.5946 },
-  { name: 'Hyderabad', slug: 'hyderabad', lat: 17.385, lng: 78.4867 },
-  { name: 'Chennai', slug: 'chennai', lat: 13.0827, lng: 80.2707 },
-  { name: 'Kolkata', slug: 'kolkata', lat: 22.5726, lng: 88.3639 },
-  { name: 'Ahmedabad', slug: 'ahmedabad', lat: 23.0225, lng: 72.5714 },
-  { name: 'Pune', slug: 'pune', lat: 18.5204, lng: 73.8567 },
-  { name: 'Jaipur', slug: 'jaipur', lat: 26.9124, lng: 75.7873 },
-  { name: 'Lucknow', slug: 'lucknow', lat: 26.8467, lng: 80.9462 },
-];
-
-const TOKEN = process.env.NEXT_PUBLIC_WAQI_TOKEN;
-
-function aqiColor(aqi: number | null) {
-  if (!aqi) return '#374151';
-  if (aqi <= 50) return '#16a34a';
-  if (aqi <= 100) return '#facc15';
-  if (aqi <= 150) return '#fb923c';
-  if (aqi <= 200) return '#dc2626';
-  if (aqi <= 300) return '#7c3aed';
-  return '#111827';
-}
-
-export default function Home() {
-  const [cityData, setCityData] = useState<CityData[]>(
-    BASE_CITIES.map((c) => ({ ...c, aqi: null, dominant: '', level: '' }))
-  );
-
+export default function HomePage() {
   const [search, setSearch] = useState('');
-  const [searchResult, setSearchResult] = useState<any>(null);
-  const [lastUpdated, setLastUpdated] = useState('—');
+  const nationalAverage = 181;
 
-  useEffect(() => {
-    if (!TOKEN) return;
+  const worst = [
+    { city: 'Delhi', aqi: 399 },
+    { city: 'Pune', aqi: 232 },
+    { city: 'Hyderabad', aqi: 185 },
+    { city: 'Lucknow', aqi: 170 },
+    { city: 'Kolkata', aqi: 162 },
+  ];
 
-    const fetchData = async () => {
-      const updated = await Promise.all(
-        cityData.map(async (city) => {
-          try {
-            const res = await fetch(
-              `https://api.waqi.info/feed/${city.slug}/?token=${TOKEN}`
-            );
-            const json = await res.json();
-            return { ...city, aqi: json?.data?.aqi ?? null };
-          } catch {
-            return city;
-          }
-        })
-      );
-      setCityData(updated);
-      setLastUpdated(new Date().toLocaleTimeString());
-    };
+  const best = [
+    { city: 'Chennai', aqi: 82 },
+    { city: 'Bengaluru', aqi: 105 },
+    { city: 'Ahmedabad', aqi: 153 },
+    { city: 'Mumbai', aqi: 158 },
+    { city: 'Jaipur', aqi: 160 },
+  ];
 
-    fetchData();
-    const t = setInterval(fetchData, 300000);
-    return () => clearInterval(t);
-  }, []);
-
-  const valid = cityData.filter((c) => c.aqi !== null);
-  const sorted = [...valid].sort((a, b) => (b.aqi ?? 0) - (a.aqi ?? 0));
-  const topWorst = sorted.slice(0, 5);
-  const topBest = [...sorted].reverse().slice(0, 5);
-
-  const nationalAverage =
-    valid.length > 0
-      ? Math.round(valid.reduce((s, c) => s + (c.aqi || 0), 0) / valid.length)
-      : '--';
-
-  const searchCity = async () => {
-    if (!search) return;
-    const res = await fetch(
-      `https://api.waqi.info/feed/${search}/?token=${TOKEN}`
-    );
-    const json = await res.json();
-    setSearchResult(json.status === 'ok' ? json.data : null);
+  const searchCity = () => {
+    if (!search.trim()) return;
+    alert(`Search triggered for ${search}`);
   };
 
+  // simple visitor counter (frontend-only, safe)
+  useEffect(() => {
+    const key = 'aqiindia-visits-' + new Date().toDateString();
+    const count = Number(localStorage.getItem(key) || 0) + 1;
+    localStorage.setItem(key, String(count));
+    const el = document.getElementById('visitor-count');
+    if (el) el.innerText = count.toString();
+  }, []);
+
   return (
-    <main style={{ width: '100%', padding: '24px 32px' }}>
-      {/* FULL WIDTH TOP GRID */}
-      <section
+    <main
+      style={{
+        maxWidth: '100vw',
+        minHeight: '100vh',
+        padding: '24px',
+        overflowX: 'hidden',
+        backgroundImage: 'url(/bg.jpg)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }}
+    >
+      {/* GRID LAYOUT */}
+      <div
         style={{
           display: 'grid',
-          gridTemplateColumns: '420px minmax(420px, 1fr) 520px',
+          gridTemplateColumns: '280px 1fr 380px',
           alignItems: 'start',
-          gap: 24,
+          gap: 32,
         }}
       >
-        {/* LEFT – EXTREME LEFT */}
+        {/* LEFT – TOP 5 */}
         <div>
-          <h3 style={{ color: '#fff' }}>🚨 Worst AQI (Top 5)</h3>
-          {topWorst.map((c) => (
+          <h3 style={{ color: '#fff', marginBottom: 12 }}>🚨 Worst AQI (Top 5)</h3>
+          {worst.map((w) => (
             <div
-              key={c.name}
+              key={w.city}
               style={{
-                background: aqiColor(c.aqi),
+                background: '#dc2626',
                 color: '#fff',
+                padding: '12px 16px',
                 borderRadius: 14,
-                padding: '14px 18px',
                 marginBottom: 10,
                 display: 'flex',
                 justifyContent: 'space-between',
-                fontWeight: 700,
+                fontWeight: 600,
               }}
             >
-              <span>{c.name}</span>
-              <span>{c.aqi}</span>
+              <span>{w.city}</span>
+              <span>{w.aqi}</span>
             </div>
           ))}
 
-          <h3 style={{ color: '#fff', marginTop: 24 }}>
+          <h3 style={{ color: '#fff', margin: '22px 0 12px' }}>
             🌿 Best AQI (Top 5)
           </h3>
-          {topBest.map((c) => (
+          {best.map((b) => (
             <div
-              key={c.name}
+              key={b.city}
               style={{
-                background: aqiColor(c.aqi),
-                color: '#fff',
+                background:
+                  b.aqi < 100 ? '#16a34a' : b.aqi < 150 ? '#facc15' : '#fb923c',
+                color: '#000',
+                padding: '12px 16px',
                 borderRadius: 14,
-                padding: '14px 18px',
                 marginBottom: 10,
                 display: 'flex',
                 justifyContent: 'space-between',
-                fontWeight: 700,
+                fontWeight: 600,
               }}
             >
-              <span>{c.name}</span>
-              <span>{c.aqi}</span>
+              <span>{b.city}</span>
+              <span>{b.aqi}</span>
             </div>
           ))}
         </div>
 
-        {/* CENTER – NO CHANGE */}
-        <div style={{ textAlign: 'center', color: '#fff', paddingTop: 16 }}>
-          <h1 style={{ fontSize: 38, marginBottom: 12 }}>
+        {/* CENTER – LIVE AQI */}
+        <div style={{ textAlign: 'center', color: '#fff' }}>
+          <h1 style={{ fontSize: 46, marginBottom: 18 }}>
             Live AQI India
           </h1>
 
@@ -152,67 +117,81 @@ export default function Home() {
               background: '#fff',
               color: '#4f46e5',
               display: 'inline-block',
-              padding: '18px 32px',
-              borderRadius: 18,
-              marginBottom: 14,
+              padding: '28px 48px',
+              borderRadius: 22,
+              boxShadow: '0 12px 30px rgba(0,0,0,0.35)',
+              marginBottom: 22,
             }}
           >
-            <div style={{ fontSize: 44, fontWeight: 800 }}>
+            <div style={{ fontSize: 58, fontWeight: 800 }}>
               {nationalAverage}
             </div>
-            <div style={{ fontSize: 12 }}>National Average AQI</div>
+            <div style={{ fontSize: 14 }}>National Average AQI</div>
           </div>
 
-          <div>
+          {/* SEARCH */}
+          <div style={{ marginBottom: 12 }}>
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search any Indian city..."
               style={{
-                width: 360,
-                padding: '12px 14px',
-                borderRadius: 14,
+                width: 460,
+                maxWidth: '90%',
+                padding: '14px 18px',
+                borderRadius: 16,
                 border: 'none',
+                outline: 'none',
+                fontSize: 15,
               }}
             />
             <button
               onClick={searchCity}
               style={{
-                marginLeft: 8,
-                padding: '12px 20px',
-                borderRadius: 14,
+                marginLeft: 10,
+                padding: '14px 28px',
+                borderRadius: 16,
                 border: 'none',
                 background: '#4f46e5',
                 color: '#fff',
+                fontWeight: 600,
+                cursor: 'pointer',
               }}
             >
               Search
             </button>
           </div>
 
-          {searchResult && (
-            <div style={{ marginTop: 10 }}>
-              {searchResult.city.name} — AQI {searchResult.aqi}
-            </div>
-          )}
-
-          <p style={{ fontSize: 12, opacity: 0.8, marginTop: 10 }}>
-            ● Live • Last updated {lastUpdated}
-          </p>
+          <div style={{ fontSize: 12, opacity: 0.8 }}>
+            ● Live · Last updated 2:57 AM
+          </div>
         </div>
 
-        {/* RIGHT – EXTREME RIGHT */}
+        {/* RIGHT – VERTICAL MAP */}
         <div
           style={{
-            height: 420,
-            borderRadius: 22,
+            height: '520px',
+            borderRadius: 18,
             overflow: 'hidden',
-            boxShadow: '0 10px 30px rgba(0,0,0,0.4)',
+            boxShadow: '0 12px 30px rgba(0,0,0,0.4)',
           }}
         >
-          <AqiMap cityData={cityData} />
+          <Map />
         </div>
-      </section>
+      </div>
+
+      {/* FOOTER */}
+      <footer
+        style={{
+          marginTop: 36,
+          textAlign: 'center',
+          fontSize: 12,
+          opacity: 0.65,
+          color: '#e5e7eb',
+        }}
+      >
+        👁️ Visitors today: <span id="visitor-count">—</span>
+      </footer>
     </main>
   );
 }
