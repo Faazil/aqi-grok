@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import './globals.css';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css';
 
@@ -28,7 +27,6 @@ export default function RootLayout({
             'system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto',
         }}
       >
-        {/* Dark overlay for readability */}
         <div
           style={{
             minHeight: '100vh',
