@@ -1,70 +1,37 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import dynamic from 'next/dynamic';
+import { useEffect, useState } from "react";
+import AqiMap from "@/components/AqiMap";
 
-const AqiMap = dynamic(() => import('./components/AqiMap'), {
-  ssr: false,
-});
-
-type CityAQI = {
-  name: string;
+export interface CityData {
+  city: string;
+  lat: number;
+  lon: number;
   aqi: number;
-};
+}
 
 export default function HomePage() {
-  const [worst, setWorst] = useState<CityAQI[]>([]);
-  const [best, setBest] = useState<CityAQI[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [cityData, setCityData] = useState<CityData[]>([]);
 
   useEffect(() => {
-    async function loadTop5() {
-      try {
-        const res = await fetch('/api/india');
-        const data = await res.json();
-
-        setWorst(data.worst || []);
-        setBest(data.best || []);
-      } catch (e) {
-        console.error('Failed to load AQI', e);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadTop5();
+    fetch("/api/all")
+      .then((res) => res.json())
+      .then((data: CityData[]) => {
+        if (Array.isArray(data)) {
+          setCityData(data);
+        } else {
+          setCityData([]);
+        }
+      })
+      .catch(() => setCityData([]));
   }, []);
 
   return (
-    <>
-      {/* 🔴 Worst AQI (Top 5) */}
-      <section>
-        <h3>🚨 Worst AQI (Top 5)</h3>
-        {loading
-          ? 'Loading...'
-          : worst.map((c) => (
-              <div key={c.name} className="aqi-bad">
-                <span>{c.name}</span>
-                <span>{c.aqi}</span>
-              </div>
-            ))}
-      </section>
+    <main className="page">
+      <h1>India AQI Dashboard</h1>
 
-      {/* 🟢 Best AQI (Top 5) */}
-      <section>
-        <h3>🌱 Best AQI (Top 5)</h3>
-        {loading
-          ? 'Loading...'
-          : best.map((c) => (
-              <div key={c.name} className="aqi-good">
-                <span>{c.name}</span>
-                <span>{c.aqi}</span>
-              </div>
-            ))}
-      </section>
-
-      {/* Map remains untouched */}
-      <AqiMap />
-    </>
+      {/* Map is NEVER conditionally rendered */}
+      <AqiMap cityData={cityData} />
+    </main>
   );
 }
