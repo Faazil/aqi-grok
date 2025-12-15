@@ -3,6 +3,7 @@
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import { useEffect } from 'react';
+import 'leaflet/dist/leaflet.css';
 
 export interface CityData {
   name: string;
@@ -24,17 +25,21 @@ export default function AqiMap({ cityData }: { cityData: CityData[] }) {
     <div
       style={{
         width: '100%',
-        height: '520px',
-        borderRadius: '16px',
+        height: '640px',           // 🔒 FIXED HEIGHT (vertical as you want)
+        borderRadius: '18px',
         overflow: 'hidden',
-        background: '#111',
+        background: '#0f172a',
+        boxShadow: '0 10px 40px rgba(0,0,0,0.6)',
       }}
     >
       <MapContainer
         center={[22.5937, 78.9629]}
         zoom={5}
         scrollWheelZoom={false}
-        style={{ width: '100%', height: '100%' }}
+        style={{
+          width: '100%',
+          height: '100%',
+        }}
       >
         <TileLayer
           attribution="© OpenStreetMap contributors"
