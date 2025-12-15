@@ -29,7 +29,6 @@ function FixMapResize() {
     const t = setTimeout(() => {
       map.invalidateSize();
     }, 300);
-
     return () => clearTimeout(t);
   }, [map]);
 
