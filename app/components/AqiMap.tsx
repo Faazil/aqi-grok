@@ -1,55 +1,74 @@
-'use client';
+"use client";
 
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import L from 'leaflet';
+import { useEffect } from "react";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Popup,
+  useMap,
+} from "react-leaflet";
+import L from "leaflet";
+import { CityData } from "@/app/page";
 
-export interface CityData {
-  name: string;
-  aqi: number;
-  lat: number;
-  lng: number;
-}
-
-const icon = new L.Icon({
-  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
+// Fix Leaflet default icon issue
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl:
+    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  iconUrl:
+    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+  shadowUrl:
+    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
 
-/**
- * cityData is OPTIONAL now
- */
+function FixMapResize() {
+  const map = useMap();
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      map.invalidateSize();
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [map]);
+
+  return null;
+}
+
 export default function AqiMap({
-  cityData = [],
+  cityData,
 }: {
-  cityData?: CityData[];
+  cityData: CityData[];
 }) {
   return (
-    <MapContainer
-      center={[22.5937, 78.9629]}
-      zoom={5}
-      style={{ height: '520px', width: '100%' }}
-      scrollWheelZoom={false}
-    >
-      <TileLayer
-        attribution="&copy; OpenStreetMap contributors"
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
+    <div className="map-wrapper">
+      <MapContainer
+        center={[22.5937, 78.9629]}
+        zoom={5}
+        scrollWheelZoom
+        style={{ height: "600px", width: "100%" }}
+      >
+        <FixMapResize />
 
-      {cityData.map((city) => (
-        <Marker
-          key={city.name}
-          position={[city.lat, city.lng]}
-          icon={icon}
-        >
-          <Popup>
-            <strong>{city.name}</strong>
-            <br />
-            AQI: {city.aqi}
-          </Popup>
-        </Marker>
-      ))}
-    </MapContainer>
+        <TileLayer
+          attribution="&copy; OpenStreetMap contributors"
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+
+        {cityData.map((city, index) => (
+          <Marker
+            key={index}
+            position={[city.lat, city.lon]}
+          >
+            <Popup>
+              <strong>{city.city}</strong>
+              <br />
+              AQI: {city.aqi}
+            </Popup>
+          </Marker>
+        ))}
+      </MapContainer>
+    </div>
   );
 }
