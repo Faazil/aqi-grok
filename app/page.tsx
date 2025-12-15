@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import AqiMap from "@/components/AqiMap";
+import AqiMap from "./components/AqiMap";
 
 export interface CityData {
   city: string;
@@ -29,8 +29,6 @@ export default function HomePage() {
   return (
     <main className="page">
       <h1>India AQI Dashboard</h1>
-
-      {/* Map is NEVER conditionally rendered */}
       <AqiMap cityData={cityData} />
     </main>
   );
