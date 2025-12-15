@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
+import type { CityData } from './components/AqiMap';
 
 const AqiMap = dynamic(() => import('./components/AqiMap'), {
   ssr: false,
@@ -15,6 +16,10 @@ export default function HomePage() {
   const [updated, setUpdated] = useState('');
   const [visitors, setVisitors] = useState(0);
 
+  // 👇 REQUIRED for map
+  const [cityData, setCityData] = useState<CityData[]>([]);
+
+  // 🔹 Real visitor count
   useEffect(() => {
     fetch('/api/visit')
       .then((r) => r.json())
@@ -35,6 +40,19 @@ export default function HomePage() {
       setAqi(data.aqi);
       setDominant(data.dominant);
       setUpdated(data.time);
+
+      // 👇 Update map safely
+      setCityData([
+        {
+          name: data.city,
+          slug: data.city.toLowerCase(),
+          aqi: data.aqi,
+          dominant: data.dominant,
+          level: data.level,
+          lat: data.lat,
+          lng: data.lng,
+        },
+      ]);
     } catch (e) {
       console.error(e);
     }
@@ -42,7 +60,7 @@ export default function HomePage() {
 
   return (
     <>
-      {/* 🔴 EXISTING UI — UNCHANGED 🔴 */}
+      {/* 🔴 UI LEFT AS-IS 🔴 */}
 
       <h1 className="title">Live AQI India</h1>
 
@@ -66,7 +84,8 @@ export default function HomePage() {
         {updated && <div>Updated: {updated}</div>}
       </div>
 
-      <AqiMap />
+      {/* ✅ FIXED */}
+      <AqiMap cityData={cityData} />
 
       <div className="visitors">
         👁️ Visitors today: {visitors}
