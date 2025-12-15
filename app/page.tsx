@@ -8,77 +8,75 @@ const AqiMap = dynamic(() => import('./components/AqiMap'), {
   ssr: false,
 });
 
-const CITY_DATA: CityData[] = [
-  { name: 'Delhi', slug: 'delhi', aqi: 399, dominant: 'pm10', level: 'Hazardous', lat: 28.6139, lng: 77.209 },
-  { name: 'Pune', slug: 'pune', aqi: 232, dominant: 'pm25', level: 'Very Unhealthy', lat: 18.5204, lng: 73.8567 },
-  { name: 'Hyderabad', slug: 'hyderabad', aqi: 185, dominant: 'pm25', level: 'Unhealthy', lat: 17.385, lng: 78.4867 },
-  { name: 'Lucknow', slug: 'lucknow', aqi: 170, dominant: 'pm25', level: 'Unhealthy', lat: 26.8467, lng: 80.9462 },
-  { name: 'Kolkata', slug: 'kolkata', aqi: 162, dominant: 'pm25', level: 'Unhealthy', lat: 22.5726, lng: 88.3639 },
-
-  { name: 'Chennai', slug: 'chennai', aqi: 82, dominant: 'pm25', level: 'Moderate', lat: 13.0827, lng: 80.2707 },
-  { name: 'Bengaluru', slug: 'bengaluru', aqi: 105, dominant: 'pm25', level: 'Moderate', lat: 12.9716, lng: 77.5946 },
-  { name: 'Ahmedabad', slug: 'ahmedabad', aqi: 153, dominant: 'pm25', level: 'Unhealthy', lat: 23.0225, lng: 72.5714 },
-  { name: 'Mumbai', slug: 'mumbai', aqi: 158, dominant: 'pm25', level: 'Unhealthy', lat: 19.076, lng: 72.8777 },
-  { name: 'Jaipur', slug: 'jaipur', aqi: 160, dominant: 'pm25', level: 'Unhealthy', lat: 26.9124, lng: 75.7873 },
+const cities: CityData[] = [
+  { name: 'Delhi', aqi: 399, level: 'Severe', lat: 28.6139, lng: 77.209 },
+  { name: 'Pune', aqi: 232, level: 'Poor', lat: 18.5204, lng: 73.8567 },
+  { name: 'Hyderabad', aqi: 185, level: 'Moderate', lat: 17.385, lng: 78.4867 },
+  { name: 'Lucknow', aqi: 170, level: 'Moderate', lat: 26.8467, lng: 80.9462 },
+  { name: 'Kolkata', aqi: 162, level: 'Moderate', lat: 22.5726, lng: 88.3639 },
 ];
 
 export default function HomePage() {
   const [search, setSearch] = useState('');
 
   return (
-    <main className="page-root">
-      <div className="layout-grid">
-
-        {/* LEFT COLUMN */}
-        <aside className="left-panel">
+    <main className="page">
+      <div className="layout">
+        {/* LEFT */}
+        <aside className="panel">
           <h3>🚨 Worst AQI (Top 5)</h3>
-          {CITY_DATA.slice(0, 5).map(c => (
-            <div key={c.slug} className="pill red">
+          {cities.map((c) => (
+            <div key={c.name} className="aqi-row bg-red-600">
               <span>{c.name}</span>
-              <b>{c.aqi}</b>
+              <span>{c.aqi}</span>
             </div>
           ))}
 
-          <h3 className="mt">🌿 Best AQI (Top 5)</h3>
-          {CITY_DATA.slice(5).map(c => (
-            <div key={c.slug} className="pill green">
+          <h3 className="mt-4">🌱 Best AQI (Top 5)</h3>
+          {[
+            { name: 'Chennai', aqi: 82 },
+            { name: 'Bengaluru', aqi: 105 },
+            { name: 'Ahmedabad', aqi: 153 },
+            { name: 'Mumbai', aqi: 158 },
+            { name: 'Jaipur', aqi: 160 },
+          ].map((c) => (
+            <div key={c.name} className="aqi-row bg-green-600">
               <span>{c.name}</span>
-              <b>{c.aqi}</b>
+              <span>{c.aqi}</span>
             </div>
           ))}
         </aside>
 
         {/* CENTER */}
-        <section className="center-panel">
-          <h1>Live AQI India</h1>
+        <section className="center">
+          <h1 className="text-3xl font-bold">Live AQI India</h1>
 
-          <div className="aqi-box">
-            <div className="aqi-number">181</div>
-            <div className="aqi-label">National Average AQI</div>
+          <div className="aqi-card">
+            <div className="text-4xl font-bold">181</div>
+            <div className="text-sm mt-1">National Average AQI</div>
           </div>
 
-          <div className="search-row">
+          <div className="search-box">
             <input
-              value={search}
-              onChange={e => setSearch(e.target.value)}
               placeholder="Search any Indian city..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
             />
             <button>Search</button>
           </div>
 
-          <p className="updated">• Live · Last updated 2:57 AM</p>
+          <div className="text-xs mt-3 opacity-80">
+            ● Live · Last updated 2:57 AM
+          </div>
+
+          <div className="visitors">👁 Visitors today: 8</div>
         </section>
 
         {/* RIGHT */}
-        <aside className="map-panel">
-          <AqiMap cityData={CITY_DATA} />
+        <aside>
+          <AqiMap cityData={cities} />
         </aside>
-
       </div>
-
-      <footer className="visitors">
-        👁 Visitors today: 8
-      </footer>
     </main>
   );
 }
