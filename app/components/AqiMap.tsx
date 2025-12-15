@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 
 export interface CityData {
@@ -21,14 +21,18 @@ const icon = new L.Icon({
   iconAnchor: [12, 41],
 });
 
-export default function AqiMap({ cityData = [] }: { cityData?: CityData[] }) {
-
+/* 🔧 Force Leaflet to recalc size */
+function FixMapResize() {
+  const map = useMap();
   useEffect(() => {
     setTimeout(() => {
-      window.dispatchEvent(new Event('resize'));
-    }, 200);
-  }, []);
+      map.invalidateSize();
+    }, 300);
+  }, [map]);
+  return null;
+}
 
+export default function AqiMap({ cityData = [] }: { cityData?: CityData[] }) {
   return (
     <div className="map-wrapper">
       <MapContainer
@@ -36,6 +40,8 @@ export default function AqiMap({ cityData = [] }: { cityData?: CityData[] }) {
         zoom={5}
         scrollWheelZoom={false}
       >
+        <FixMapResize />
+
         <TileLayer
           attribution="&copy; OpenStreetMap contributors"
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
