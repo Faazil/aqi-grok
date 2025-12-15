@@ -97,6 +97,7 @@ html, body {
   width: 420px;
   height: 70vh;
   min-height: 520px;
+  max-height: 700px;
   overflow: hidden;
   border-radius: 18px;
 }
@@ -104,8 +105,8 @@ html, body {
 .map-wrapper .leaflet-container {
   width: 100% !important;
   height: 100% !important;
-  border-radius: 18px;
 }
+
 
 /* FOOTER */
 .visitors {
