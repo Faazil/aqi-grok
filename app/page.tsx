@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 
 const AqiMap = dynamic(() => import('./components/AqiMap'), {
@@ -13,6 +13,14 @@ export default function HomePage() {
   const [aqi, setAqi] = useState(181);
   const [dominant, setDominant] = useState('');
   const [updated, setUpdated] = useState('');
+  const [visitors, setVisitors] = useState(0);
+
+  useEffect(() => {
+    fetch('/api/visit')
+      .then((r) => r.json())
+      .then((d) => setVisitors(d.visits))
+      .catch(() => {});
+  }, []);
 
   async function handleSearch() {
     if (!query) return;
@@ -34,7 +42,7 @@ export default function HomePage() {
 
   return (
     <>
-      {/* 🔴 UI STRUCTURE UNCHANGED 🔴 */}
+      {/* 🔴 EXISTING UI — UNCHANGED 🔴 */}
 
       <h1 className="title">Live AQI India</h1>
 
@@ -59,6 +67,10 @@ export default function HomePage() {
       </div>
 
       <AqiMap />
+
+      <div className="visitors">
+        👁️ Visitors today: {visitors}
+      </div>
     </>
   );
 }
