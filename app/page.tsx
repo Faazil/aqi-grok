@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 
 export interface CityData {
@@ -23,13 +23,14 @@ export default function HomePage() {
       .then((res) => res.json())
       .then((data: CityData[]) => {
         if (Array.isArray(data)) {
-          // Filter invalid coordinates
           const valid = data.filter(
             (c) =>
               typeof c.lat === "number" &&
               typeof c.lon === "number" &&
+              typeof c.aqi === "number" &&
               !isNaN(c.lat) &&
-              !isNaN(c.lon)
+              !isNaN(c.lon) &&
+              !isNaN(c.aqi)
           );
           setCityData(valid);
         } else {
@@ -39,9 +40,62 @@ export default function HomePage() {
       .catch(() => setCityData([]));
   }, []);
 
+  // 🔴 Worst AQI (highest values)
+  const worstAQI = useMemo(
+    () =>
+      [...cityData]
+        .sort((a, b) => b.aqi - a.aqi)
+        .slice(0, 5),
+    [cityData]
+  );
+
+  // 🟢 Best AQI (lowest values)
+  const bestAQI = useMemo(
+    () =>
+      [...cityData]
+        .sort((a, b) => a.aqi - b.aqi)
+        .slice(0, 5),
+    [cityData]
+  );
+
   return (
     <main className="page">
       <h1>India AQI Dashboard</h1>
+
+      <div className="top-panels">
+        <div className="panel worst">
+          <h3>Worst AQI (Top 5)</h3>
+          {worstAQI.length === 0 ? (
+            <p>No data</p>
+          ) : (
+            <ul>
+              {worstAQI.map((c, i) => (
+                <li key={i}>
+                  <span>{c.city}</span>
+                  <strong>{c.aqi}</strong>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        <div className="panel best">
+          <h3>Best AQI (Top 5)</h3>
+          {bestAQI.length === 0 ? (
+            <p>No data</p>
+          ) : (
+            <ul>
+              {bestAQI.map((c, i) => (
+                <li key={i}>
+                  <span>{c.city}</span>
+                  <strong>{c.aqi}</strong>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+
       <AqiMap cityData={cityData} />
     </main>
   );
