@@ -1,117 +1,109 @@
-html, body {
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Prevent horizontal scroll */
+html,
+body {
   margin: 0;
   padding: 0;
   overflow-x: hidden;
 }
 
-.page-root {
+/* Main page background */
+.page {
   min-height: 100vh;
-  color: #fff;
+  background:
+    linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.55)),
+    url("https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=2400&q=80");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  color: white;
 }
 
-.layout-grid {
+/* Layout grid */
+.layout {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 40px 24px;
   display: grid;
-  grid-template-columns: 280px 1fr 420px;
+  grid-template-columns: 300px 1fr 360px;
   gap: 40px;
-  padding: 40px 60px;
   align-items: start;
 }
 
-/* LEFT */
-.left-panel h3 {
-  margin: 10px 0;
-}
-
-.pill {
-  display: flex;
-  justify-content: space-between;
-  padding: 10px 14px;
-  border-radius: 10px;
-  margin-bottom: 10px;
-  font-weight: 600;
-}
-
-.red { background: #dc2626; }
-.green { background: #16a34a; }
-.mt { margin-top: 20px; }
-
-/* CENTER */
-.center-panel {
+/* Center column */
+.center {
   text-align: center;
 }
 
-.center-panel h1 {
-  font-size: 34px;
-  margin-bottom: 20px;
-}
-
-.aqi-box {
-  background: #fff;
-  color: #1f2937;
-  display: inline-block;
-  padding: 26px 36px;
-  border-radius: 18px;
-}
-
-.aqi-number {
-  font-size: 42px;
-  font-weight: 800;
+/* AQI Card */
+.aqi-card {
+  background: white;
   color: #4f46e5;
+  border-radius: 16px;
+  padding: 28px 36px;
+  display: inline-block;
+  margin: 20px 0;
 }
 
-.aqi-label {
-  font-size: 14px;
-}
-
-.search-row {
+.search-box {
+  margin-top: 16px;
   display: flex;
   justify-content: center;
-  gap: 10px;
-  margin-top: 20px;
+  gap: 12px;
 }
 
-.search-row input {
+.search-box input {
   width: 380px;
   padding: 12px 16px;
   border-radius: 999px;
   border: none;
+  outline: none;
+  color: black;
 }
 
-.search-row button {
+.search-box button {
   padding: 12px 20px;
   border-radius: 999px;
-  border: none;
   background: #4f46e5;
-  color: #fff;
+  color: white;
   font-weight: 600;
 }
 
-.updated {
-  margin-top: 8px;
-  font-size: 12px;
-  opacity: .8;
+/* Side panels */
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-/* MAP */
-.map-wrapper {
-  width: 420px;
-  height: 70vh;
-  min-height: 520px;
-  max-height: 700px;
-  overflow: hidden;
-  border-radius: 18px;
+.panel h3 {
+  font-weight: bold;
+  margin-bottom: 8px;
 }
 
-.map-wrapper .leaflet-container {
-  width: 100% !important;
-  height: 100% !important;
+/* AQI row */
+.aqi-row {
+  padding: 10px 14px;
+  border-radius: 999px;
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
 }
 
-
-/* FOOTER */
+/* Visitor counter */
 .visitors {
   text-align: center;
-  margin-top: 30px;
+  margin-top: 60px;
+  opacity: 0.85;
   font-size: 14px;
-  opacity: .9;
+}
+
+/* Leaflet fixes */
+.leaflet-container {
+  width: 100%;
+  height: 520px;
+  border-radius: 16px;
 }
