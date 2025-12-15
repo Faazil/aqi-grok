@@ -2,12 +2,11 @@
 
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
-import { useEffect } from 'react';
-import 'leaflet/dist/leaflet.css';
 
 export interface CityData {
   name: string;
-  aqi: number;
+  aqi: number | null;
+  dominant: string;
   level: string;
   lat: number;
   lng: number;
@@ -22,46 +21,32 @@ const icon = new L.Icon({
 
 export default function AqiMap({ cityData }: { cityData: CityData[] }) {
   return (
-    <div
-      style={{
-        width: '100%',
-        height: '640px',           // 🔒 FIXED HEIGHT (vertical as you want)
-        borderRadius: '18px',
-        overflow: 'hidden',
-        background: '#0f172a',
-        boxShadow: '0 10px 40px rgba(0,0,0,0.6)',
-      }}
+    <MapContainer
+      center={[22.5937, 78.9629]}
+      zoom={5}
+      style={{ height: '520px', width: '100%' }}
+      scrollWheelZoom={false}
     >
-      <MapContainer
-        center={[22.5937, 78.9629]}
-        zoom={5}
-        scrollWheelZoom={false}
-        style={{
-          width: '100%',
-          height: '100%',
-        }}
-      >
-        <TileLayer
-          attribution="© OpenStreetMap contributors"
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
+      <TileLayer
+        attribution="&copy; OpenStreetMap contributors"
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      />
 
-        {cityData.map((city) => (
-          <Marker
-            key={city.name}
-            position={[city.lat, city.lng]}
-            icon={icon}
-          >
-            <Popup>
-              <strong>{city.name}</strong>
-              <br />
-              AQI: {city.aqi}
-              <br />
-              {city.level}
-            </Popup>
-          </Marker>
-        ))}
-      </MapContainer>
-    </div>
+      {cityData.map((city) => (
+        <Marker
+          key={city.name}
+          position={[city.lat, city.lng]}
+          icon={icon}
+        >
+          <Popup>
+            <strong>{city.name}</strong>
+            <br />
+            AQI: {city.aqi ?? '—'}
+            <br />
+            {city.level}
+          </Popup>
+        </Marker>
+      ))}
+    </MapContainer>
   );
 }
