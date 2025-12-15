@@ -11,7 +11,6 @@ import {
 import L from "leaflet";
 import type { CityData } from "../page";
 
-// Fix Leaflet default marker icons
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl:
@@ -27,7 +26,6 @@ function FitBounds({ cityData }: { cityData: CityData[] }) {
 
   useEffect(() => {
     if (cityData.length === 0) {
-      // Fallback to India
       map.setView([22.5937, 78.9629], 5);
       return;
     }
