@@ -13,22 +13,31 @@ export interface CityData {
   lng: number;
 }
 
+/* Default marker icon (Leaflet fix for Next.js) */
 const icon = new L.Icon({
-  iconUrl:
-    'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  shadowUrl:
-    'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
   iconSize: [25, 41],
   iconAnchor: [12, 41],
 });
 
-export default function AqiMap({ cityData }: { cityData: CityData[] }) {
+/* ✅ cityData is OPTIONAL now */
+type Props = {
+  cityData?: CityData[];
+};
+
+export default function AqiMap({ cityData = [] }: Props) {
   return (
     <MapContainer
-      center={[22.5937, 78.9629]}
+      center={[22.5937, 78.9629]} // India center
       zoom={5}
-      style={{ height: '500px', width: '100%' }}
       scrollWheelZoom={false}
+      style={{
+        height: '70vh',      // ⬅ vertical map
+        minHeight: '520px',  // ⬅ ensures tall layout
+        width: '100%',
+        borderRadius: '16px',
+      }}
     >
       <TileLayer
         attribution="&copy; OpenStreetMap contributors"
@@ -37,7 +46,7 @@ export default function AqiMap({ cityData }: { cityData: CityData[] }) {
 
       {cityData.map((city) => (
         <Marker
-          key={city.name}
+          key={city.slug || city.name}
           position={[city.lat, city.lng]}
           icon={icon}
         >
