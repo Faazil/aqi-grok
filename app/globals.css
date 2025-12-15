@@ -1,20 +1,13 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* Prevent horizontal scroll */
-html,
-body {
+html, body {
   margin: 0;
   padding: 0;
   overflow-x: hidden;
 }
 
-/* Main page background */
 .page {
   min-height: 100vh;
   background:
-    linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.55)),
+    linear-gradient(rgba(0,0,0,.6), rgba(0,0,0,.6)),
     url("https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=2400&q=80");
   background-size: cover;
   background-position: center;
@@ -22,34 +15,48 @@ body {
   color: white;
 }
 
-/* Layout grid */
 .layout {
   max-width: 1400px;
-  margin: 0 auto;
+  margin: auto;
   padding: 40px 24px;
   display: grid;
   grid-template-columns: 300px 1fr 360px;
   gap: 40px;
-  align-items: start;
 }
 
-/* Center column */
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.aqi-row {
+  padding: 10px 14px;
+  border-radius: 999px;
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+}
+
 .center {
   text-align: center;
 }
 
-/* AQI Card */
 .aqi-card {
   background: white;
   color: #4f46e5;
   border-radius: 16px;
-  padding: 28px 36px;
+  padding: 26px 36px;
   display: inline-block;
   margin: 20px 0;
 }
 
+.value {
+  font-size: 42px;
+  font-weight: bold;
+}
+
 .search-box {
-  margin-top: 16px;
   display: flex;
   justify-content: center;
   gap: 12px;
@@ -60,8 +67,6 @@ body {
   padding: 12px 16px;
   border-radius: 999px;
   border: none;
-  outline: none;
-  color: black;
 }
 
 .search-box button {
@@ -69,41 +74,11 @@ body {
   border-radius: 999px;
   background: #4f46e5;
   color: white;
-  font-weight: 600;
-}
-
-/* Side panels */
-.panel {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.panel h3 {
   font-weight: bold;
-  margin-bottom: 8px;
 }
 
-/* AQI row */
-.aqi-row {
-  padding: 10px 14px;
-  border-radius: 999px;
-  font-weight: 600;
-  display: flex;
-  justify-content: space-between;
-}
-
-/* Visitor counter */
 .visitors {
-  text-align: center;
-  margin-top: 60px;
+  margin-top: 40px;
+  font-size: 15px;
   opacity: 0.85;
-  font-size: 14px;
-}
-
-/* Leaflet fixes */
-.leaflet-container {
-  width: 100%;
-  height: 520px;
-  border-radius: 16px;
 }
