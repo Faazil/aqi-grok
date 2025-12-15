@@ -9,9 +9,9 @@ import {
   useMap,
 } from "react-leaflet";
 import L from "leaflet";
-import { CityData } from "@/app/page";
+import type { CityData } from "../page";
 
-// Fix Leaflet default icon issue
+// Fix Leaflet default marker icon issue
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl:
@@ -26,11 +26,11 @@ function FixMapResize() {
   const map = useMap();
 
   useEffect(() => {
-    const timer = setTimeout(() => {
+    const t = setTimeout(() => {
       map.invalidateSize();
     }, 300);
 
-    return () => clearTimeout(timer);
+    return () => clearTimeout(t);
   }, [map]);
 
   return null;
@@ -56,11 +56,8 @@ export default function AqiMap({
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
-        {cityData.map((city, index) => (
-          <Marker
-            key={index}
-            position={[city.lat, city.lon]}
-          >
+        {cityData.map((city, idx) => (
+          <Marker key={idx} position={[city.lat, city.lon]}>
             <Popup>
               <strong>{city.city}</strong>
               <br />
