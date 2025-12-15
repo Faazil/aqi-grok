@@ -1,15 +1,12 @@
-import './globals.css';
+import "./globals.css";
+import "leaflet/dist/leaflet.css";
 
 export const metadata = {
-  title: 'Live AQI India',
-  description: 'Real-time Air Quality Index across India',
+  title: "AQI India",
+  description: "Live AQI across Indian cities",
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>{children}</body>
