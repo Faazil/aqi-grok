@@ -10,10 +10,6 @@ export interface CityData {
   aqi: number;
 }
 
-/**
- * IMPORTANT:
- * Leaflet depends on `window`, so SSR MUST be disabled
- */
 const AqiMap = dynamic(() => import("./components/AqiMap"), {
   ssr: false,
   loading: () => <p>Loading map…</p>,
@@ -27,7 +23,15 @@ export default function HomePage() {
       .then((res) => res.json())
       .then((data: CityData[]) => {
         if (Array.isArray(data)) {
-          setCityData(data);
+          // Filter invalid coordinates
+          const valid = data.filter(
+            (c) =>
+              typeof c.lat === "number" &&
+              typeof c.lon === "number" &&
+              !isNaN(c.lat) &&
+              !isNaN(c.lon)
+          );
+          setCityData(valid);
         } else {
           setCityData([]);
         }
