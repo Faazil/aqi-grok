@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import AqiMap from "./components/AqiMap";
+import dynamic from "next/dynamic";
 
 export interface CityData {
   city: string;
@@ -9,6 +9,15 @@ export interface CityData {
   lon: number;
   aqi: number;
 }
+
+/**
+ * IMPORTANT:
+ * Leaflet depends on `window`, so SSR MUST be disabled
+ */
+const AqiMap = dynamic(() => import("./components/AqiMap"), {
+  ssr: false,
+  loading: () => <p>Loading map…</p>,
+});
 
 export default function HomePage() {
   const [cityData, setCityData] = useState<CityData[]>([]);
