@@ -1,18 +1,16 @@
 // app/page.tsx
 'use client';
 
-import dynamic from 'next/dynamic';
+// Removed dynamic import of AqiMap here, it's now handled inside MapWrapper
 import { useState, useEffect, useCallback } from 'react';
 import type { CityData } from './components/AqiMap';
 import { useDebounce } from './hooks/useDebounce'; 
-
-const AqiMap = dynamic(() => import('./components/AqiMap'), {
-  ssr: false,
-});
+// NEW IMPORT: Use the wrapper component to ensure client-side rendering of the map
+import MapWrapper from './components/MapWrapper'; 
 
 const API_TOKEN = process.env.NEXT_PUBLIC_WAQI_TOKEN;
 
-// --- Skeleton Component ---
+// --- Skeleton Component (Used in this file) ---
 const SkeletonRow = () => (
     <div className="aqi-row aqi-row-skeleton skeleton-box" style={{height: 40}}></div>
 );
@@ -26,6 +24,7 @@ export default function HomePage() {
   const [focusCoords, setFocusCoords] = useState<[number, number] | null>(null); 
   const [visitorData, setVisitorData] = useState<{totalHits: number, uniqueVisitors: number} | null>(null); 
   
+  // Debounce the search term to prevent excessive API calls
   const debouncedSearch = useDebounce(search, 500); 
 
   const initialCities = [
@@ -43,8 +42,8 @@ export default function HomePage() {
     return { level: 'Severe', color: '#7f1d1d' };
   };
 
+  // Memoized function for fetching AQI data
   const fetchCityAqi = useCallback(async (cityName: string): Promise<CityData | null> => {
-    // Uses 'demo' key if real token is missing
     const token = API_TOKEN || 'demo'; 
     
     try {
@@ -73,6 +72,7 @@ export default function HomePage() {
     return null;
   }, []);
 
+  // Handler for search (used by both debounce and explicit click)
   const handleDebouncedSearch = useCallback(async (searchTerm: string) => {
     setLoading(true);
     setError(null);
@@ -98,13 +98,12 @@ export default function HomePage() {
 
   // EFFECT: Watches debouncedSearch and automatically triggers API call
   useEffect(() => {
-    // Only search if input is not empty and the city is not already loaded
     if (debouncedSearch.trim() && !cities.find(c => c.name.toLowerCase() === debouncedSearch.toLowerCase())) {
         handleDebouncedSearch(debouncedSearch);
     }
   }, [debouncedSearch, cities, handleDebouncedSearch]);
 
-  // Handler for explicit button click (overrides debounce)
+  // Handler for explicit button click
   const handleExplicitSearchClick = () => {
     if (search.trim()) {
         handleDebouncedSearch(search);
@@ -166,7 +165,6 @@ export default function HomePage() {
         <aside className="panel">
           <h3>🚨 Worst AQI (Top 5)</h3>
           {loading ? (
-             // Renders 5 skeleton rows while loading
              Array(5).fill(0).map((_, i) => <SkeletonRow key={`worst-${i}`} />)
           ) : (
             worstCities.map((c) => (
@@ -184,7 +182,6 @@ export default function HomePage() {
 
           <h3 style={{ marginTop: 24 }}>🌱 Best AQI (Top 5)</h3>
           {loading ? (
-             // Renders 5 skeleton rows while loading
              Array(5).fill(0).map((_, i) => <SkeletonRow key={`best-${i}`} />)
           ) : (
             bestCities.map((c) => (
@@ -208,7 +205,6 @@ export default function HomePage() {
           <div className="aqi-card">
             <div className="value">
               {loading ? (
-                // Renders skeleton for average AQI value
                 <div className="skeleton-box aqi-card-skeleton" />
               ) : avgAqi}
             </div>
@@ -250,9 +246,9 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* RIGHT PANEL */}
+        {/* RIGHT PANEL: The Map Wrapper Component */}
         <aside>
-          <AqiMap cityData={cities} focusCoords={focusCoords} />
+          <MapWrapper cityData={cities} focusCoords={focusCoords} />
         </aside>
       </div>
     </main>
