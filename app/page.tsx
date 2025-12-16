@@ -3,9 +3,8 @@
 
 import dynamic from 'next/dynamic';
 import { useState, useEffect } from 'react';
-import type { CityData } from './components/AqiMap'; // Imports the fixed type
+import type { CityData } from './components/AqiMap';
 
-// Import Map dynamically to avoid SSR issues
 const AqiMap = dynamic(() => import('./components/AqiMap'), {
   ssr: false,
 });
@@ -15,10 +14,10 @@ const API_TOKEN = process.env.NEXT_PUBLIC_WAQI_TOKEN;
 
 export default function HomePage() {
   const [search, setSearch] = useState('');
-  // Type is now just CityData[] because the definition in AqiMap.tsx is fixed
   const [cities, setCities] = useState<CityData[]>([]); 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [focusCoords, setFocusCoords] = useState<[number, number] | null>(null); 
 
   // Initial list of cities to fetch on load
   const initialCities = [
@@ -27,7 +26,6 @@ export default function HomePage() {
     'Patna', 'Gurugram', 'Noida', 'Chandigarh'
   ];
 
-  // Helper to determine color based on AQI
   const getLevel = (aqi: number) => {
     if (aqi <= 50) return { level: 'Good', color: '#16a34a' };
     if (aqi <= 100) return { level: 'Satisfactory', color: '#65a30d' };
@@ -37,13 +35,41 @@ export default function HomePage() {
     return { level: 'Severe', color: '#7f1d1d' };
   };
 
-  // Fetch AQI for a single city
   const fetchCityAqi = async (cityName: string): Promise<CityData | null> => {
-    if (!API_TOKEN) {
-        setError("API Token not configured. Please set NEXT_PUBLIC_WAQI_TOKEN in your environment.");
+    if (!API_TOKEN || API_TOKEN === 'demo') {
+        // Use 'demo' for local testing if token is missing but warn the user
+        const token = API_TOKEN || 'demo';
+        if (token === 'demo') {
+            // Note: WAQI demo key is very restricted, results may be sparse.
+        }
+        
+        try {
+            const res = await fetch(`https://api.waqi.info/feed/${cityName}/?token=${token}`);
+            const data = await res.json();
+
+            if (data.status === 'ok') {
+                const aqi = data.data.aqi;
+                
+                if (typeof aqi !== 'number') return null;
+
+                const { level, color } = getLevel(aqi);
+                
+                return {
+                    name: cityName,
+                    aqi: aqi,
+                    level: level,
+                    lat: data.data.city.geo[0], 
+                    lng: data.data.city.geo[1],
+                    color: color
+                } as CityData;
+            }
+        } catch (err) {
+            console.error(`Failed to fetch data for ${cityName}`, err);
+        }
         return null;
     }
     
+    // Original fetch logic using real token
     try {
       const res = await fetch(`https://api.waqi.info/feed/${cityName}/?token=${API_TOKEN}`);
       const data = await res.json();
@@ -55,7 +81,6 @@ export default function HomePage() {
 
         const { level, color } = getLevel(aqi);
         
-        // --- CLEANED UP RETURN TYPE ---
         return {
           name: cityName,
           aqi: aqi,
@@ -63,7 +88,7 @@ export default function HomePage() {
           lat: data.data.city.geo[0], 
           lng: data.data.city.geo[1],
           color: color
-        } as CityData; // The type matches the CityData interface now!
+        } as CityData;
       }
     } catch (err) {
       console.error(`Failed to fetch data for ${cityName}`, err);
@@ -71,7 +96,6 @@ export default function HomePage() {
     return null;
   };
 
-  // Load initial data
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
@@ -80,17 +104,19 @@ export default function HomePage() {
       const promises = initialCities.map(city => fetchCityAqi(city));
       const results = await Promise.all(promises);
       
-      // Filter out failed requests (nulls)
       const validCities = results.filter((c): c is CityData => c !== null);
       
       setCities(validCities);
       setLoading(false);
+      
+      if (!API_TOKEN) {
+         setError("WARNING: API Token is missing. Using restricted 'demo' mode. Please set NEXT_PUBLIC_WAQI_TOKEN.");
+      }
     };
 
     loadData();
   }, []);
 
-  // Handle Search
   const handleSearch = async () => {
     if (!search.trim()) return;
     setLoading(true);
@@ -99,28 +125,32 @@ export default function HomePage() {
     const result = await fetchCityAqi(search);
     
     if (result) {
-      // Add the new city to the list if it's not already there
       setCities(prev => {
         const exists = prev.find(c => c.name.toLowerCase() === result.name.toLowerCase());
         if (exists) return prev.map(c => c.name.toLowerCase() === result.name.toLowerCase() ? result : c);
         return [...prev, result];
       });
-      setSearch(''); // Clear input
+      // Focus on the searched city
+      setFocusCoords([result.lat, result.lng]); 
+      setSearch('');
     } else {
-        // Only set error if it wasn't an API token configuration error
-        if (!error) { 
+        // Only set error if it wasn't an API token configuration error message
+        if (!error || !error.includes("API Token is missing")) { 
             setError(`Could not find data for "${search}" or the city name is invalid.`);
         }
     }
     setLoading(false);
   };
 
-  // Derive "Worst" and "Best" lists dynamically
-  const sortedCities = [...cities].sort((a, b) => b.aqi - a.aqi); // High to Low
+  // HANDLER: Set the coordinates to focus the map
+  const handleCityClick = (city: CityData) => {
+    setFocusCoords([city.lat, city.lng]);
+  };
+
+  const sortedCities = [...cities].sort((a, b) => b.aqi - a.aqi);
   const worstCities = sortedCities.slice(0, 5);
-  const bestCities = [...cities].sort((a, b) => a.aqi - b.aqi).slice(0, 5); // Low to High
+  const bestCities = [...cities].sort((a, b) => a.aqi - b.aqi).slice(0, 5);
   
-  // Calculate National Average (Simple mean of loaded cities)
   const avgAqi = cities.length > 0 
     ? Math.round(cities.reduce((acc, curr) => acc + curr.aqi, 0) / cities.length) 
     : 0;
@@ -135,9 +165,9 @@ export default function HomePage() {
             worstCities.map((c) => (
               <div
                 key={c.name}
-                className="aqi-row"
-                // This line now works because c is guaranteed to have 'color'
+                className="aqi-row clickable-row"
                 style={{ background: c.color }} 
+                onClick={() => handleCityClick(c)}
               >
                 <span>{c.name}</span>
                 <span>{c.aqi}</span>
@@ -150,9 +180,9 @@ export default function HomePage() {
             bestCities.map((c) => (
               <div
                 key={c.name}
-                className="aqi-row"
-                // This line now works because c is guaranteed to have 'color'
+                className="aqi-row clickable-row"
                 style={{ background: c.color }}
+                onClick={() => handleCityClick(c)}
               >
                 <span>{c.name}</span>
                 <span>{c.aqi}</span>
@@ -182,16 +212,26 @@ export default function HomePage() {
             </button>
           </div>
           
-          {error && <p style={{ color: '#f87171', marginTop: 10 }}>{error}</p>}
+          {/* Display error/warning messages */}
+          {error && <p style={{ color: error.includes("WARNING") ? '#ffc107' : '#f87171', marginTop: 10 }}>{error}</p>}
 
           <div className="meta">
             ● Live Data · {cities.length} cities tracked
+            <button 
+                onClick={() => setFocusCoords(null)} 
+                style={{ background: 'none', border: 'none', color: 'white', marginLeft: '10px', textDecoration: 'underline', cursor: 'pointer', opacity: focusCoords ? 1 : 0.5 }}
+                disabled={!focusCoords}
+            >
+                (Reset Map View)
+            </button>
           </div>
+
+          <div className="visitors">👁 Visitors today: 8 (Static)</div>
         </section>
 
         {/* RIGHT PANEL */}
         <aside>
-          <AqiMap cityData={cities} />
+          <AqiMap cityData={cities} focusCoords={focusCoords} />
         </aside>
       </div>
     </main>
