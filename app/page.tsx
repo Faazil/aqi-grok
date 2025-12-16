@@ -1,10 +1,10 @@
-// app/page.tsx (FINAL VERSION WITH AUTO-REFRESH)
+// app/page.tsx (FINAL VERSION WITH AUTO-REFRESH AND SEARCH RESULT DISPLAY)
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import type { CityData } from './components/AqiMap';
 import MapWrapper from './components/MapWrapper'; 
-import { useInterval } from './hooks/useInterval'; // NEW IMPORT
+import { useInterval } from './hooks/useInterval'; 
 
 const API_TOKEN = process.env.NEXT_PUBLIC_WAQI_TOKEN;
 const REFRESH_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
@@ -14,6 +14,29 @@ const SkeletonRow = () => (
     <div className="aqi-row aqi-row-skeleton skeleton-box" style={{height: 40}}></div>
 );
 
+// --- Component to display the search result AQI ---
+const SearchResultAqiDisplay = ({ city }: { city: CityData }) => {
+    return (
+        <div 
+            className="aqi-card search-result-card" 
+            style={{ 
+                margin: '15px auto', 
+                maxWidth: '300px', 
+                background: city.color,
+                color: '#000' // Dark text for visibility on colored background
+            }}
+        >
+            <div className="value" style={{fontSize: '32px'}}>
+                {city.aqi}
+            </div>
+            <div className="label" style={{fontWeight: 'bold'}}>
+                {city.name} ({city.level})
+            </div>
+        </div>
+    );
+};
+
+
 // --- Main Component ---
 export default function HomePage() {
   const [search, setSearch] = useState('');
@@ -22,7 +45,9 @@ export default function HomePage() {
   const [error, setError] = useState<string | null>(null);
   const [focusCoords, setFocusCoords] = useState<[number, number] | null>(null); 
   const [visitorCount, setVisitorCount] = useState<number | null>(1);
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null); // NEW STATE for tracking time
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null); 
+  // NEW STATE: To hold the AQI data of the city that was just searched
+  const [searchedCityResult, setSearchedCityResult] = useState<CityData | null>(null);
   
   const initialCities = [
     'Delhi', 'Mumbai', 'Kolkata', 'Chennai', 'Bengaluru', 
@@ -81,7 +106,6 @@ export default function HomePage() {
       setLoading(true);
       setError(null);
     } else {
-      // For auto-refresh, avoid showing the full loading skeleton/spinner
       console.log('Auto-refreshing city data...');
     }
 
@@ -93,7 +117,7 @@ export default function HomePage() {
     const validCities = results.filter((c): c is CityData => c !== null);
     
     setCities(validCities);
-    setLastUpdated(new Date()); // Update the last updated time
+    setLastUpdated(new Date()); 
     
     if (isInitialLoad) {
       setLoading(false);
@@ -116,10 +140,11 @@ export default function HomePage() {
     }
   }, REFRESH_INTERVAL_MS);
 
-  // Search Handler (Unchanged from last stable version)
+  // CORRECTED handleSearch FUNCTION with new state update
   const handleSearch = async () => {
     if (!search.trim()) return;
     setLoading(true);
+    setSearchedCityResult(null); // Clear previous result on new search attempt
     setError(null);
 
     const result = await fetchCityAqi(search);
@@ -136,6 +161,7 @@ export default function HomePage() {
       });
       
       setFocusCoords([result.lat, result.lng]); 
+      setSearchedCityResult(result); // <-- NEW: Store the successful result
       setSearch(''); 
       
     } else {
@@ -159,7 +185,6 @@ export default function HomePage() {
     ? Math.round(cities.reduce((acc, curr) => acc + curr.aqi, 0) / cities.length) 
     : 0;
     
-  // Helper to display last updated time
   const timeDisplay = lastUpdated
     ? lastUpdated.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })
     : '...';
@@ -228,6 +253,9 @@ export default function HomePage() {
               {loading ? '...' : 'Search'}
             </button>
           </div>
+          
+          {/* NEW: Conditional rendering of the last search result */}
+          {searchedCityResult && <SearchResultAqiDisplay city={searchedCityResult} />}
           
           {error && <p style={{ color: error.includes("WARNING") ? '#ffc107' : '#f87171', marginTop: 10 }}>{error}</p>}
 
