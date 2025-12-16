@@ -1,11 +1,10 @@
-// app/page.tsx (FINAL VERSION WITH DARK MODE TOGGLE AND SYNTAX FIX)
+// app/page.tsx (REVERTED: Dark Mode/useLocalStorage Removed)
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import type { CityData } from './components/AqiMap';
 import MapWrapper from './components/MapWrapper'; 
 import { useInterval } from './hooks/useInterval'; 
-import { useLocalStorage } from './hooks/useLocalStorage'; 
 import Footer from './components/Footer'; 
 
 const API_TOKEN = process.env.NEXT_PUBLIC_WAQI_TOKEN;
@@ -50,9 +49,7 @@ export default function HomePage() {
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null); 
   const [searchedCityResult, setSearchedCityResult] = useState<CityData | null>(null);
   
-  // THEME STATE: Managed by localStorage hook
-  const [theme, setTheme] = useLocalStorage<'light' | 'dark'>('aqiTheme', 'light');
-
+  // DEFINITIVE LIST: 50 Major Cities and State/UT Capitals of India
   const initialCities = [
     'Delhi', 'Mumbai', 'Kolkata', 'Chennai', 'Bengaluru', 
     'Hyderabad', 'Pune', 'Ahmedabad', 'Surat', 'Jaipur',
@@ -136,12 +133,7 @@ export default function HomePage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); 
 
-  // Hook 2: Apply the theme class to the body element
-  useEffect(() => {
-    document.body.className = `${theme}-theme`;
-  }, [theme]);
-
-  // Hook 3: Auto-Refresh using useInterval
+  // Hook 2: Auto-Refresh using useInterval
   useInterval(() => {
     if (!loading) {
         refreshCityData(false);
@@ -185,10 +177,6 @@ export default function HomePage() {
     setFocusCoords([city.lat, city.lng]);
   };
 
-  const toggleTheme = () => {
-    setTheme(theme === 'light' ? 'dark' : 'light');
-  };
-
   const sortedCities = [...cities].sort((a, b) => b.aqi - a.aqi);
   const worstCities = sortedCities.slice(0, 5);
   const bestCities = [...cities].sort((a, b) => a.aqi - b.aqi).slice(0, 5);
@@ -203,33 +191,12 @@ export default function HomePage() {
 
   return (
     <main className="page">
-      {/* THEME TOGGLE BUTTON */}
-      <button 
-        onClick={toggleTheme}
-        style={{
-          position: 'absolute',
-          top: '20px',
-          right: '20px',
-          background: 'var(--bg-color-secondary)',
-          color: 'var(--text-color-primary)',
-          border: '1px solid var(--text-color-secondary)',
-          borderRadius: '50%',
-          width: '40px',
-          height: '40px',
-          fontSize: '20px',
-          cursor: 'pointer',
-          zIndex: 100
-        }}
-        aria-label={`Switch to ${theme === 'light' ? 'Dark' : 'Light'} Mode`}
-      >
-        {theme === 'light' ? '🌙' : '☀️'}
-      </button>
-      
       <div className="layout">
         {/* LEFT PANEL */}
         <aside className="panel">
           <h3>🚨 Worst AQI (Top 5)</h3>
           
+          {/* POLLUTANT CLARIFICATION TEXT */}
           <p style={{ fontSize: '0.85em', opacity: 0.7, margin: '0 0 10px 0', textAlign: 'center' }}>
             *AQI driven primarily by PM2.5 concentrations.
           </p>
@@ -252,6 +219,7 @@ export default function HomePage() {
 
           <h3 style={{ marginTop: 24 }}>🌱 Best AQI (Top 5)</h3>
           
+          {/* POLLUTANT CLARIFICATION TEXT */}
           <p style={{ fontSize: '0.85em', opacity: 0.7, margin: '0 0 10px 0', textAlign: 'center' }}>
             *AQI driven primarily by PM2.5 concentrations.
           </p>
@@ -277,7 +245,6 @@ export default function HomePage() {
         <section className="center">
           <h1>Live AQI India</h1>
 
-          {/* FIX APPLIED: Corrected the redundant className attribute */}
           <div className="aqi-card">
             <div className="value">
               {loading ? (
@@ -293,8 +260,7 @@ export default function HomePage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-              // Apply theme variable for input background and text color
-              style={{ background: 'var(--bg-color-primary)', color: 'var(--text-color-primary)' }}
+              // Revert inline styling from dark mode attempt
             />
             <button onClick={handleSearch} disabled={loading}>
               {loading ? '...' : 'Search'}
@@ -309,7 +275,7 @@ export default function HomePage() {
             ● Live Data · {cities.length} cities tracked. Last updated: {timeDisplay}
             <button 
                 onClick={() => setFocusCoords(null)} 
-                style={{ background: 'none', border: 'none', color: 'var(--text-color-primary)', marginLeft: '10px', textDecoration: 'underline', cursor: 'pointer', opacity: focusCoords ? 1 : 0.5 }}
+                style={{ background: 'none', border: 'none', color: 'white', marginLeft: '10px', textDecoration: 'underline', cursor: 'pointer', opacity: focusCoords ? 1 : 0.5 }}
                 disabled={!focusCoords}
             >
                 (Reset Map View)
