@@ -1,52 +1,56 @@
 /* app/globals.css */
 
-/* BASE STYLES */
-html, body {
+/* Global Reset and Body Styling */
+body {
   margin: 0;
   padding: 0;
   overflow-x: hidden;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  color: white;
 }
 
+/* Base Page Styling */
 .page {
   min-height: 100vh;
+  /* Dark background with image effect */
   background:
-    linear-gradient(rgba(0,0,0,.6), rgba(0,0,0,.6)),
+    linear-gradient(rgba(0,0,0,.7), rgba(0,0,0,.7)),
     url("https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=2400&q=80");
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
   color: white;
+  padding: 20px 16px; 
 }
 
-/* LAYOUT: MOBILE FIRST (Flex Column) */
+/* Main Layout Grid */
 .layout {
   max-width: 1400px;
   margin: auto;
-  
-  /* Mobile First: Stack items vertically with smaller padding */
   display: flex;
-  flex-direction: column; 
-  padding: 20px 16px; 
+  flex-direction: column; /* Mobile First: Stack items vertically */
   gap: 30px;
 }
 
-/* LAYOUT: DESKTOP (Grid) */
+/* Media Query for DESKTOP (Grid layout) */
 @media (min-width: 1024px) {
   .layout {
-    padding: 40px 24px;
     display: grid;
-    /* Your original 3-column layout */
+    /* 3-column layout: Sidebar, Center Content, Map */
     grid-template-columns: 300px 1fr 360px; 
     gap: 40px;
+    padding: 40px 24px;
   }
   
   /* CRITICAL: Give the map container a fixed height on desktop */
-  .layout > aside {
+  .layout > aside:last-child {
     height: 600px; 
   }
 }
 
-/* COMPONENT STYLES */
+/* ---------------------------------------------------------------------- */
+/* --- COMPONENT STYLES --- */
+/* ---------------------------------------------------------------------- */
 
 .panel {
   display: flex;
@@ -57,22 +61,22 @@ html, body {
 
 .aqi-row {
   padding: 10px 14px;
-  border-radius: 999px;
+  border-radius: 6px;
   font-weight: 600;
   display: flex;
   justify-content: space-between;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+  color: #000; /* Text color for the colored rows */
 }
 
-/* NEW STYLE FOR CLICKABLE ROWS */
+/* Style for rows that trigger the map zoom */
 .clickable-row {
     cursor: pointer;
-    transition: transform 0.1s ease;
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
 }
 
 .clickable-row:hover {
-    transform: scale(1.02);
-    /* Optional: Add a subtle lift effect on hover */
+    transform: translateY(-2px);
     box-shadow: 0 4px 6px rgba(0,0,0,0.2);
 }
 
@@ -81,12 +85,13 @@ html, body {
 }
 
 .aqi-card {
-  background: white;
-  color: #4f46e5;
+  background: #222;
+  color: white;
   border-radius: 16px;
   padding: 26px 36px;
   display: inline-block;
   margin: 20px 0;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
 }
 
 .value {
@@ -94,7 +99,7 @@ html, body {
   font-weight: bold;
 }
 
-/* Search Box: Flexible for mobile screens */
+/* Search Box: Flexible layout */
 .search-box {
   display: flex;
   justify-content: center;
@@ -111,6 +116,8 @@ html, body {
   border-radius: 999px;
   border: none;
   font-size: 16px; 
+  background-color: #1a1a1a;
+  color: white;
 }
 
 .search-box button {
@@ -122,35 +129,71 @@ html, body {
   border: none;
   cursor: pointer;
   white-space: nowrap; 
+  transition: background 0.2s;
 }
 
-.meta {
+.search-box button:hover:not(:disabled) {
+    background: #3b30d3;
+}
+
+.meta, .visitors {
     opacity: 0.85;
     margin-top: 10px;
 }
 
-.visitors {
-  margin-top: 40px;
-  font-size: 15px;
-  opacity: 0.85;
-}
-
 /* LEAFLET MAP STYLES */
-/* Ensure the map container fills its parent and prevents marker overlap issues */
 .leaflet-container {
     height: 100%;
     width: 100%;
     border-radius: 16px;
 }
 
-/* Fix for dark background */
 .leaflet-popup-content-wrapper {
     background: #fff;
     color: #333;
     border-radius: 12px;
 }
 
-/* Custom color for popups */
 .leaflet-popup-tip {
     background: #fff;
+}
+
+/* ---------------------------------------------------------------------- */
+/* --- SKELETON STYLES (for loading UX) --- */
+/* ---------------------------------------------------------------------- */
+
+/* Shimmer animation definition */
+@keyframes shimmer {
+  0% {
+    background-position: -400px 0;
+  }
+  100% {
+    background-position: 400px 0;
+  }
+}
+
+.skeleton-box {
+  /* This base styling creates the animated shimmer effect */
+  background: #282828; 
+  animation: shimmer 2s infinite linear;
+  background: linear-gradient(to right, #282828 8%, #3f3f3f 18%, #282828 33%);
+  background-size: 800px 104px;
+}
+
+/* Skeleton for the National Average Card value */
+.aqi-card-skeleton {
+    width: 100px;
+    height: 42px;
+    margin: 0 auto;
+    border-radius: 8px;
+    margin-bottom: 5px;
+}
+
+/* Skeleton for the List Rows (Worst/Best AQI) */
+.aqi-row-skeleton {
+  /* Inherits aqi-row padding, then adds its own style */
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  height: 40px; 
+  border-radius: 6px;
 }
