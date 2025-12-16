@@ -1,7 +1,5 @@
-// app/about-aqi/page.tsx (CRITICAL FIX: REMOVED ALL STRAY LATEX)
+// app/about-aqi/page.tsx (FINAL VERSION WITH POLLUTANT UNITS ADDED)
 import Link from 'next/link';
-
-// You can reuse your Footer component here for consistency
 import Footer from '../components/Footer'; 
 
 const AboutAqiPage = () => {
@@ -36,29 +34,26 @@ const AboutAqiPage = () => {
         </p>
 
         <h2 style={{ color: '#a78bfa', borderBottom: '1px solid #444', paddingBottom: '10px', marginTop: '30px' }}>
-          The Six Major Pollutants Tracked
+          The Six Major Pollutants Tracked and Their Units
         </h2>
         <p>
-          The final AQI number is determined by the pollutant with the highest sub-index value. The key pollutants monitored are:
+          The final AQI number is determined by the pollutant with the highest sub-index value. Note that while the AQI itself is unitless, the pollutant concentrations are measured in the following standard units:
         </p>
         <ul style={{ listStyleType: 'disc', paddingLeft: '20px' }}>
           <li style={{ marginBottom: '10px' }}>
-            <strong>PM2.5 and PM10:</strong> Fine Particulate Matter. These are microscopic particles that, when inhaled, can penetrate deep into the lungs and bloodstream. PM2.5 is the most dangerous and is often the main driver of high AQI readings.
+            <strong>PM2.5 and PM10:</strong> Fine Particulate Matter. Measured in **$\mu \text{g}/\text{m}^3$** (micrograms per cubic meter).
           </li>
           <li style={{ marginBottom: '10px' }}>
-            {/* CORRECTED LINE 50 */}
-            <strong>Ozone (O<sub>3</sub>):</strong> Ground-level ozone is a key component of smog, often peaking in warmer months.
+            <strong>Ozone (O<sub>3</sub>):</strong> Measured in **$\mu \text{g}/\text{m}^3$** or **ppb** (parts per billion).
           </li>
           <li style={{ marginBottom: '10px' }}>
-            {/* CORRECTED LINE 53 */}
-            <strong>Nitrogen Dioxide (NO<sub>2</sub>):</strong> Primarily comes from vehicle emissions and industrial smokestacks.
+            <strong>Nitrogen Dioxide (NO<sub>2</sub>):</strong> Measured in **$\mu \text{g}/\text{m}^3$** or **ppb**.
           </li>
           <li style={{ marginBottom: '10px' }}>
-            <strong>Carbon Monoxide (CO):</strong> A colorless, odorless gas released when fuel is burned incompletely.
+            <strong>Carbon Monoxide (CO):</strong> Measured in **$\text{mg}/\text{m}^3$** (milligrams per cubic meter) or **ppm** (parts per million).
           </li>
           <li style={{ marginBottom: '10px' }}>
-            {/* CORRECTED LINE 59 */}
-            <strong>Sulphur Dioxide (SO<sub>2</sub>):</strong> Produced when fuels containing sulfur are burned, such as coal.
+            <strong>Sulphur Dioxide (SO<sub>2</sub>):</strong> Measured in **$\mu \text{g}/\text{m}^3$** or **ppb**.
           </li>
         </ul>
         
