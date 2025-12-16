@@ -11,7 +11,7 @@ const AqiMap = dynamic(() => import('./components/AqiMap'), {
 
 // 1. Replace this with your actual token from https://aqicn.org/data-platform/token/
 // Use 'demo' only for testing (it has rate limits and restricted cities)
-const API_TOKEN = 'demo'; 
+const API_TOKEN = process.env.NEXT_PUBLIC_WAQI_TOKEN;
 
 export default function HomePage() {
   const [search, setSearch] = useState('');
