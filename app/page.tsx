@@ -1,10 +1,11 @@
-// app/page.tsx (FINAL VERSION WITH AUTO-REFRESH AND SEARCH RESULT DISPLAY)
+// app/page.tsx (FINAL VERSION WITH AUTO-REFRESH, SEARCH RESULT DISPLAY, AND FOOTER)
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import type { CityData } from './components/AqiMap';
 import MapWrapper from './components/MapWrapper'; 
 import { useInterval } from './hooks/useInterval'; 
+import Footer from './components/Footer'; // NEW IMPORT: Footer component
 
 const API_TOKEN = process.env.NEXT_PUBLIC_WAQI_TOKEN;
 const REFRESH_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
@@ -23,7 +24,7 @@ const SearchResultAqiDisplay = ({ city }: { city: CityData }) => {
                 margin: '15px auto', 
                 maxWidth: '300px', 
                 background: city.color,
-                color: '#000' // Dark text for visibility on colored background
+                color: '#000' 
             }}
         >
             <div className="value" style={{fontSize: '32px'}}>
@@ -46,9 +47,9 @@ export default function HomePage() {
   const [focusCoords, setFocusCoords] = useState<[number, number] | null>(null); 
   const [visitorCount, setVisitorCount] = useState<number | null>(1);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null); 
-  // NEW STATE: To hold the AQI data of the city that was just searched
   const [searchedCityResult, setSearchedCityResult] = useState<CityData | null>(null);
   
+  // DEFINITIVE LIST: 50 Major Cities and State/UT Capitals of India
   const initialCities = [
     'Delhi', 'Mumbai', 'Kolkata', 'Chennai', 'Bengaluru', 
     'Hyderabad', 'Pune', 'Ahmedabad', 'Surat', 'Jaipur',
@@ -100,7 +101,6 @@ export default function HomePage() {
     return null;
   }, []);
 
-  // NEW FUNCTION: Handles both initial load and auto-refresh
   const refreshCityData = useCallback(async (isInitialLoad: boolean = false) => {
     if (isInitialLoad) {
       setLoading(true);
@@ -140,11 +140,11 @@ export default function HomePage() {
     }
   }, REFRESH_INTERVAL_MS);
 
-  // CORRECTED handleSearch FUNCTION with new state update
+  // handleSearch FUNCTION
   const handleSearch = async () => {
     if (!search.trim()) return;
     setLoading(true);
-    setSearchedCityResult(null); // Clear previous result on new search attempt
+    setSearchedCityResult(null); 
     setError(null);
 
     const result = await fetchCityAqi(search);
@@ -161,7 +161,7 @@ export default function HomePage() {
       });
       
       setFocusCoords([result.lat, result.lng]); 
-      setSearchedCityResult(result); // <-- NEW: Store the successful result
+      setSearchedCityResult(result); 
       setSearch(''); 
       
     } else {
@@ -254,7 +254,6 @@ export default function HomePage() {
             </button>
           </div>
           
-          {/* NEW: Conditional rendering of the last search result */}
           {searchedCityResult && <SearchResultAqiDisplay city={searchedCityResult} />}
           
           {error && <p style={{ color: error.includes("WARNING") ? '#ffc107' : '#f87171', marginTop: 10 }}>{error}</p>}
@@ -280,6 +279,9 @@ export default function HomePage() {
           <MapWrapper cityData={cities} focusCoords={focusCoords} />
         </aside>
       </div>
+
+      {/* FOOTER RENDERED OUTSIDE THE GRID LAYOUT */}
+      <Footer />
     </main>
   );
 }
