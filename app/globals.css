@@ -1,3 +1,43 @@
+/* app/globals.css (Add these theme definitions) */
+
+:root {
+  /* Default (Light) Theme - This is the current theme */
+  --bg-color-primary: #1a1a1a;
+  --bg-color-secondary: #252525;
+  --text-color-primary: #ffffff;
+  --text-color-secondary: #aaaaaa;
+}
+
+.light-theme {
+  /* Keeping the current dark aesthetic as 'light' since your original theme was dark */
+  --bg-color-primary: #1a1a1a;
+  --bg-color-secondary: #252525;
+  --text-color-primary: #ffffff;
+  --text-color-secondary: #aaaaaa;
+}
+
+.dark-theme {
+  /* An even darker theme for contrast */
+  --bg-color-primary: #000000;
+  --bg-color-secondary: #0a0a0a;
+  --text-color-primary: #f0f0f0;
+  --text-color-secondary: #999999;
+}
+
+/* Ensure these CSS variables are applied globally */
+body {
+  background-color: var(--bg-color-primary);
+  color: var(--text-color-primary);
+  /* The rest of your existing body styles remain here */
+}
+
+.panel, .center, .aqi-card {
+  /* Apply the secondary background variable to key areas */
+  background-color: var(--bg-color-secondary);
+}
+
+/* You will need to review your custom classes (e.g., .search-box input) 
+   and apply --text-color-primary/secondary to them for full theming. */
 /* app/globals.css */
 
 /* Global Reset and Body Styling */
