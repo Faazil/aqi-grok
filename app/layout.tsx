@@ -17,12 +17,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           CRITICAL STEP: ADSense VERIFICATION CODE IMPLEMENTATION
           =======================================================
           
+          NOTE: I have fixed 'crossorigin' to 'crossOrigin' (camel case).
+          
           Place the entire <script> tag provided by Google AdSense here.
-          It typically looks like the example below:
+          The example below uses your actual client ID prefix (2115058796417473)
+          that was visible in the error message for accuracy.
         */}
-        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2115058796417473"
-          crossorigin="anonymous">
-        
+        <script 
+          async 
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2115058796417473"
+          crossOrigin="anonymous">
         </script>
         
         {/* =======================================================
