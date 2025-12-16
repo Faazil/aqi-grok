@@ -2,8 +2,9 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type { CityData } from './components/AqiMap';
+import { useDebounce } from './hooks/useDebounce'; 
 
 const AqiMap = dynamic(() => import('./components/AqiMap'), {
   ssr: false,
@@ -11,16 +12,21 @@ const AqiMap = dynamic(() => import('./components/AqiMap'), {
 
 const API_TOKEN = process.env.NEXT_PUBLIC_WAQI_TOKEN;
 
+// --- Skeleton Component ---
+const SkeletonRow = () => (
+    <div className="aqi-row aqi-row-skeleton skeleton-box" style={{height: 40}}></div>
+);
+
+// --- Main Component ---
 export default function HomePage() {
   const [search, setSearch] = useState('');
   const [cities, setCities] = useState<CityData[]>([]); 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [focusCoords, setFocusCoords] = useState<[number, number] | null>(null); 
-  // NEW STATE: For tracking the real visitor count
-  const [visitorCount, setVisitorCount] = useState<number | null>(null); 
-
-  // ... (initialCities, getLevel, fetchCityAqi, handleSearch, handleCityClick functions remain the same) ...
+  const [visitorData, setVisitorData] = useState<{totalHits: number, uniqueVisitors: number} | null>(null); 
+  
+  const debouncedSearch = useDebounce(search, 500); 
 
   const initialCities = [
     'Delhi', 'Mumbai', 'Kolkata', 'Chennai', 'Bengaluru', 
@@ -37,37 +43,12 @@ export default function HomePage() {
     return { level: 'Severe', color: '#7f1d1d' };
   };
 
-  const fetchCityAqi = async (cityName: string): Promise<CityData | null> => {
-    // Note: Fetch logic remains as in the previous complete file
-    // ... (rest of fetchCityAqi function)
-    if (!API_TOKEN || API_TOKEN === 'demo') {
-        const token = API_TOKEN || 'demo';
-        try {
-            const res = await fetch(`https://api.waqi.info/feed/${cityName}/?token=${token}`);
-            const data = await res.json();
-
-            if (data.status === 'ok') {
-                const aqi = data.data.aqi;
-                if (typeof aqi !== 'number') return null;
-                const { level, color } = getLevel(aqi);
-                return {
-                    name: cityName,
-                    aqi: aqi,
-                    level: level,
-                    lat: data.data.city.geo[0], 
-                    lng: data.data.city.geo[1],
-                    color: color
-                } as CityData;
-            }
-        } catch (err) {
-            console.error(`Failed to fetch data for ${cityName}`, err);
-        }
-        return null;
-    }
+  const fetchCityAqi = useCallback(async (cityName: string): Promise<CityData | null> => {
+    // Uses 'demo' key if real token is missing
+    const token = API_TOKEN || 'demo'; 
     
-    // Original fetch logic using real token
     try {
-      const res = await fetch(`https://api.waqi.info/feed/${cityName}/?token=${API_TOKEN}`);
+      const res = await fetch(`https://api.waqi.info/feed/${cityName}/?token=${token}`);
       const data = await res.json();
 
       if (data.status === 'ok') {
@@ -90,33 +71,61 @@ export default function HomePage() {
       console.error(`Failed to fetch data for ${cityName}`, err);
     }
     return null;
+  }, []);
+
+  const handleDebouncedSearch = useCallback(async (searchTerm: string) => {
+    setLoading(true);
+    setError(null);
+
+    const result = await fetchCityAqi(searchTerm);
+    
+    if (result) {
+      setCities(prev => {
+        const exists = prev.find(c => c.name.toLowerCase() === result.name.toLowerCase());
+        if (exists) return prev.map(c => c.name.toLowerCase() === result.name.toLowerCase() ? result : c);
+        return [...prev, result];
+      });
+      setFocusCoords([result.lat, result.lng]); 
+    } else {
+        if (!error || !error.includes("AQI Token is missing")) { 
+            if (searchTerm === search) {
+                setError(`Could not find data for "${searchTerm}" or the city name is invalid.`);
+            }
+        }
+    }
+    setLoading(false);
+  }, [fetchCityAqi, search, error]);
+
+  // EFFECT: Watches debouncedSearch and automatically triggers API call
+  useEffect(() => {
+    // Only search if input is not empty and the city is not already loaded
+    if (debouncedSearch.trim() && !cities.find(c => c.name.toLowerCase() === debouncedSearch.toLowerCase())) {
+        handleDebouncedSearch(debouncedSearch);
+    }
+  }, [debouncedSearch, cities, handleDebouncedSearch]);
+
+  // Handler for explicit button click (overrides debounce)
+  const handleExplicitSearchClick = () => {
+    if (search.trim()) {
+        handleDebouncedSearch(search);
+    }
   };
-  
-  // NEW useEffect for Visitor Count
+
+  // EFFECT: Initial Data Load and Visitor Count Fetch
   useEffect(() => {
     const fetchVisitorCount = async () => {
         try {
-            // Call the new API route
             const res = await fetch('/api/visits');
             const data = await res.json();
             
             if (res.ok) {
-                setVisitorCount(data.count);
-            } else {
-                console.error('Visitor API Error:', data.error);
-                setVisitorCount(null); // Keep it null on error
+                setVisitorData({totalHits: data.totalHits, uniqueVisitors: data.uniqueVisitors});
             }
         } catch (err) {
-            console.error('Network or parsing error for visitor count', err);
-            setVisitorCount(null);
+            console.error('Visitor API Error:', err);
         }
     };
     
-    fetchVisitorCount();
-  }, []); // Run only once on mount
-
-  useEffect(() => {
-    // ... (rest of initial city data load logic)
     const loadData = async () => {
       setLoading(true);
       setError(null);
@@ -135,30 +144,8 @@ export default function HomePage() {
     };
 
     loadData();
-  }, []);
-
-  const handleSearch = async () => {
-    if (!search.trim()) return;
-    setLoading(true);
-    setError(null);
-
-    const result = await fetchCityAqi(search);
-    
-    if (result) {
-      setCities(prev => {
-        const exists = prev.find(c => c.name.toLowerCase() === result.name.toLowerCase());
-        if (exists) return prev.map(c => c.name.toLowerCase() === result.name.toLowerCase() ? result : c);
-        return [...prev, result];
-      });
-      setFocusCoords([result.lat, result.lng]); 
-      setSearch('');
-    } else {
-        if (!error || !error.includes("AQI Token is missing")) { 
-            setError(`Could not find data for "${search}" or the city name is invalid.`);
-        }
-    }
-    setLoading(false);
-  };
+    fetchVisitorCount();
+  }, [fetchCityAqi]);
 
   const handleCityClick = (city: CityData) => {
     setFocusCoords([city.lat, city.lng]);
@@ -166,7 +153,7 @@ export default function HomePage() {
 
   const sortedCities = [...cities].sort((a, b) => b.aqi - a.aqi);
   const worstCities = sortedCities.slice(0, 5);
-  const bestCities = [...cities].sort((a, b) => a.aqi - a.aqi).slice(0, 5);
+  const bestCities = [...cities].sort((a, b) => a.aqi - b.aqi).slice(0, 5);
   
   const avgAqi = cities.length > 0 
     ? Math.round(cities.reduce((acc, curr) => acc + curr.aqi, 0) / cities.length) 
@@ -178,7 +165,10 @@ export default function HomePage() {
         {/* LEFT PANEL */}
         <aside className="panel">
           <h3>🚨 Worst AQI (Top 5)</h3>
-          {loading && cities.length === 0 ? <p>Loading data...</p> : (
+          {loading ? (
+             // Renders 5 skeleton rows while loading
+             Array(5).fill(0).map((_, i) => <SkeletonRow key={`worst-${i}`} />)
+          ) : (
             worstCities.map((c) => (
               <div
                 key={c.name}
@@ -193,7 +183,10 @@ export default function HomePage() {
           )}
 
           <h3 style={{ marginTop: 24 }}>🌱 Best AQI (Top 5)</h3>
-          {loading && cities.length === 0 ? <p>Loading data...</p> : (
+          {loading ? (
+             // Renders 5 skeleton rows while loading
+             Array(5).fill(0).map((_, i) => <SkeletonRow key={`best-${i}`} />)
+          ) : (
             bestCities.map((c) => (
               <div
                 key={c.name}
@@ -213,7 +206,12 @@ export default function HomePage() {
           <h1>Live AQI India</h1>
 
           <div className="aqi-card">
-            <div className="value">{loading ? '...' : avgAqi}</div>
+            <div className="value">
+              {loading ? (
+                // Renders skeleton for average AQI value
+                <div className="skeleton-box aqi-card-skeleton" />
+              ) : avgAqi}
+            </div>
             <div className="label">National Avg AQI</div>
           </div>
 
@@ -222,9 +220,9 @@ export default function HomePage() {
               placeholder="Search any city (e.g. Surat)..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+              onKeyDown={(e) => e.key === 'Enter' && handleExplicitSearchClick()}
             />
-            <button onClick={handleSearch} disabled={loading}>
+            <button onClick={handleExplicitSearchClick} disabled={loading}>
               {loading ? '...' : 'Search'}
             </button>
           </div>
@@ -242,9 +240,13 @@ export default function HomePage() {
             </button>
           </div>
 
-          {/* UPDATED: Display dynamic visitor count */}
           <div className="visitors">
-            👁 Visitors today: {visitorCount === null ? '...' : visitorCount.toLocaleString()}
+            👁 Visitors today: {visitorData === null ? '...' : visitorData.uniqueVisitors.toLocaleString()}
+            {visitorData !== null && visitorData.totalHits > visitorData.uniqueVisitors && (
+                <span style={{ marginLeft: 10, opacity: 0.7, fontSize: '0.9em' }}>
+                    ({visitorData.totalHits} total hits)
+                </span>
+            )}
           </div>
         </section>
 
