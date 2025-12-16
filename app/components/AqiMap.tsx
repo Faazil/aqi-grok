@@ -1,10 +1,18 @@
-'use client';
-
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import L from 'leaflet';
-import { useEffect } from 'react';
+// app/components/AqiMap.tsx
+import { MapContainer, TileLayer, CircleMarker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 
+// The AQI color scheme logic is needed here to color the markers
+const getLevelColor = (aqi: number) => {
+  if (aqi <= 50) return '#16a34a';   // Green
+  if (aqi <= 100) return '#65a30d';  // Lime
+  if (aqi <= 200) return '#ca8a04';  // Yellow/Amber
+  if (aqi <= 300) return '#ea580c';  // Orange
+  if (aqi <= 400) return '#dc2626';  // Red
+  return '#7f1d1d';                   // Dark Red/Maroon
+};
+
+// Interface definition for city data
 export interface CityData {
   name: string;
   aqi: number;
@@ -13,55 +21,47 @@ export interface CityData {
   lng: number;
 }
 
-const icon = new L.Icon({
-  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-});
+interface AqiMapProps {
+  cityData: CityData[];
+}
 
-export default function AqiMap({ cityData }: { cityData: CityData[] }) {
+export default function AqiMap({ cityData }: AqiMapProps) {
+  // Center of India (Approx)
+  const INDIA_CENTER: [number, number] = [20.5937, 78.9629];
+  const INITIAL_ZOOM = 5;
+
   return (
-    <div
-      style={{
-        width: '100%',
-        height: '640px',           // 🔒 FIXED HEIGHT (vertical as you want)
-        borderRadius: '18px',
-        overflow: 'hidden',
-        background: '#0f172a',
-        boxShadow: '0 10px 40px rgba(0,0,0,0.6)',
-      }}
+    <MapContainer 
+      center={INDIA_CENTER} 
+      zoom={INITIAL_ZOOM} 
+      scrollWheelZoom={true}
+      style={{ height: '100%', width: '100%', borderRadius: '16px', border: '1px solid rgba(255, 255, 255, 0.2)' }}
     >
-      <MapContainer
-        center={[22.5937, 78.9629]}
-        zoom={5}
-        scrollWheelZoom={false}
-        style={{
-          width: '100%',
-          height: '100%',
-        }}
-      >
-        <TileLayer
-          attribution="© OpenStreetMap contributors"
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
+      <TileLayer
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      />
 
-        {cityData.map((city) => (
-          <Marker
+      {cityData.map((city) => {
+        // Use the color logic here to define the marker style
+        const color = getLevelColor(city.aqi);
+        
+        return (
+          <CircleMarker
             key={city.name}
-            position={[city.lat, city.lng]}
-            icon={icon}
+            center={[city.lat, city.lng]}
+            radius={10 + city.aqi / 100} // Radius scales with AQI for visual impact
+            pathOptions={{ color: color, fillColor: color, fillOpacity: 0.7, weight: 1.5 }}
           >
             <Popup>
-              <strong>{city.name}</strong>
-              <br />
-              AQI: {city.aqi}
-              <br />
-              {city.level}
+              <div style={{ color: '#333' }}>
+                <strong>{city.name}</strong><br />
+                AQI: <span style={{ color: color, fontWeight: 'bold' }}>{city.aqi} ({city.level})</span>
+              </div>
             </Popup>
-          </Marker>
-        ))}
-      </MapContainer>
-    </div>
+          </CircleMarker>
+        );
+      })}
+    </MapContainer>
   );
 }
