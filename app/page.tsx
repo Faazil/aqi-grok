@@ -1,11 +1,11 @@
-// app/page.tsx (FINAL VERSION WITH AUTO-REFRESH, SEARCH RESULT DISPLAY, AND FOOTER)
+// app/page.tsx (FINAL VERSION WITH POLLUTANT LABEL ADDED)
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import type { CityData } from './components/AqiMap';
 import MapWrapper from './components/MapWrapper'; 
 import { useInterval } from './hooks/useInterval'; 
-import Footer from './components/Footer'; // NEW IMPORT: Footer component
+import Footer from './components/Footer'; 
 
 const API_TOKEN = process.env.NEXT_PUBLIC_WAQI_TOKEN;
 const REFRESH_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
@@ -195,6 +195,12 @@ export default function HomePage() {
         {/* LEFT PANEL */}
         <aside className="panel">
           <h3>🚨 Worst AQI (Top 5)</h3>
+          
+          {/* NEW CLARIFICATION TEXT */}
+          <p style={{ fontSize: '0.85em', opacity: 0.7, margin: '0 0 10px 0', textAlign: 'center' }}>
+            *AQI driven primarily by PM2.5 concentrations.
+          </p>
+
           {loading ? (
              Array(5).fill(0).map((_, i) => <SkeletonRow key={`worst-${i}`} />)
           ) : (
@@ -212,6 +218,11 @@ export default function HomePage() {
           )}
 
           <h3 style={{ marginTop: 24 }}>🌱 Best AQI (Top 5)</h3>
+          {/* NEW CLARIFICATION TEXT (Repeated for consistency) */}
+          <p style={{ fontSize: '0.85em', opacity: 0.7, margin: '0 0 10px 0', textAlign: 'center' }}>
+            *AQI driven primarily by PM2.5 concentrations.
+          </p>
+          
           {loading ? (
              Array(5).fill(0).map((_, i) => <SkeletonRow key={`best-${i}`} />)
           ) : (
