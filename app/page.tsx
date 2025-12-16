@@ -1,21 +1,22 @@
+// app/page.tsx
 'use client';
 
 import dynamic from 'next/dynamic';
 import { useState, useEffect } from 'react';
-import type { CityData } from './components/AqiMap';
+import type { CityData } from './components/AqiMap'; // Imports the fixed type
 
 // Import Map dynamically to avoid SSR issues
 const AqiMap = dynamic(() => import('./components/AqiMap'), {
   ssr: false,
 });
 
-// 1. Replace this with your actual token from https://aqicn.org/data-platform/token/
-// Use 'demo' only for testing (it has rate limits and restricted cities)
+// Environment variable is now used:
 const API_TOKEN = process.env.NEXT_PUBLIC_WAQI_TOKEN;
 
 export default function HomePage() {
   const [search, setSearch] = useState('');
-  const [cities, setCities] = useState<CityData[]>([]);
+  // Type is now just CityData[] because the definition in AqiMap.tsx is fixed
+  const [cities, setCities] = useState<CityData[]>([]); 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -28,36 +29,41 @@ export default function HomePage() {
 
   // Helper to determine color based on AQI
   const getLevel = (aqi: number) => {
-    if (aqi <= 50) return { level: 'Good', color: '#16a34a' }; // Green
-    if (aqi <= 100) return { level: 'Satisfactory', color: '#65a30d' }; // Lime
-    if (aqi <= 200) return { level: 'Moderate', color: '#ca8a04' }; // Yellow
-    if (aqi <= 300) return { level: 'Poor', color: '#ea580c' }; // Orange
-    if (aqi <= 400) return { level: 'Very Poor', color: '#dc2626' }; // Red
-    return { level: 'Severe', color: '#7f1d1d' }; // Dark Red
+    if (aqi <= 50) return { level: 'Good', color: '#16a34a' };
+    if (aqi <= 100) return { level: 'Satisfactory', color: '#65a30d' };
+    if (aqi <= 200) return { level: 'Moderate', color: '#ca8a04' };
+    if (aqi <= 300) return { level: 'Poor', color: '#ea580c' };
+    if (aqi <= 400) return { level: 'Very Poor', color: '#dc2626' };
+    return { level: 'Severe', color: '#7f1d1d' };
   };
 
   // Fetch AQI for a single city
-  const fetchCityAqi = async (cityName: string) => {
+  const fetchCityAqi = async (cityName: string): Promise<CityData | null> => {
+    if (!API_TOKEN) {
+        setError("API Token not configured. Please set NEXT_PUBLIC_WAQI_TOKEN in your environment.");
+        return null;
+    }
+    
     try {
       const res = await fetch(`https://api.waqi.info/feed/${cityName}/?token=${API_TOKEN}`);
       const data = await res.json();
 
       if (data.status === 'ok') {
         const aqi = data.data.aqi;
-        // API sometimes returns text like "No data", handle that
+        
         if (typeof aqi !== 'number') return null;
 
         const { level, color } = getLevel(aqi);
         
+        // --- CLEANED UP RETURN TYPE ---
         return {
-          name: cityName, // Use the name we searched for to keep it clean
+          name: cityName,
           aqi: aqi,
           level: level,
-          // API returns geo as [lat, lng]
           lat: data.data.city.geo[0], 
           lng: data.data.city.geo[1],
           color: color
-        } as CityData & { color: string };
+        } as CityData; // The type matches the CityData interface now!
       }
     } catch (err) {
       console.error(`Failed to fetch data for ${cityName}`, err);
@@ -69,11 +75,13 @@ export default function HomePage() {
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
+      setError(null);
+      
       const promises = initialCities.map(city => fetchCityAqi(city));
       const results = await Promise.all(promises);
       
       // Filter out failed requests (nulls)
-      const validCities = results.filter((c): c is NonNullable<typeof c> => c !== null);
+      const validCities = results.filter((c): c is CityData => c !== null);
       
       setCities(validCities);
       setLoading(false);
@@ -99,7 +107,10 @@ export default function HomePage() {
       });
       setSearch(''); // Clear input
     } else {
-      setError(`Could not find data for "${search}"`);
+        // Only set error if it wasn't an API token configuration error
+        if (!error) { 
+            setError(`Could not find data for "${search}" or the city name is invalid.`);
+        }
     }
     setLoading(false);
   };
@@ -125,7 +136,8 @@ export default function HomePage() {
               <div
                 key={c.name}
                 className="aqi-row"
-                style={{ background: c.color }}
+                // This line now works because c is guaranteed to have 'color'
+                style={{ background: c.color }} 
               >
                 <span>{c.name}</span>
                 <span>{c.aqi}</span>
@@ -139,7 +151,8 @@ export default function HomePage() {
               <div
                 key={c.name}
                 className="aqi-row"
-                style={{ background: c.color }} // Use dynamic color
+                // This line now works because c is guaranteed to have 'color'
+                style={{ background: c.color }}
               >
                 <span>{c.name}</span>
                 <span>{c.aqi}</span>
