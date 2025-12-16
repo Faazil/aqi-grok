@@ -3,10 +3,9 @@
 
 import dynamic from 'next/dynamic';
 import { useState, useEffect } from 'react';
-// Assuming CityData is exported from AqiMap.tsx or a types file
 import type { CityData } from './AqiMap'; 
 
-// Use dynamic import with ssr: false inside this client component
+// Dynamic import with ssr: false
 const AqiMap = dynamic(() => import('./AqiMap'), {
   ssr: false,
   loading: () => <p style={{color: '#ccc', textAlign: 'center'}}>Loading map...</p>, 
@@ -18,12 +17,10 @@ interface MapWrapperProps {
 }
 
 export default function MapWrapper({ cityData, focusCoords }: MapWrapperProps) {
-  // CRITICAL FIX: Ensure the map component is only rendered after the component has mounted 
-  // in the browser (i.e., when 'window' is available).
+  // CRITICAL FIX: isClient state forces map rendering only after component has mounted
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    // This runs ONLY on the client after the initial render
     setIsClient(true);
   }, []);
 
@@ -32,7 +29,7 @@ export default function MapWrapper({ cityData, focusCoords }: MapWrapperProps) {
       {isClient ? (
         <AqiMap cityData={cityData} focusCoords={focusCoords} />
       ) : (
-        // Render a placeholder on the server and during initial client mount
+        // Placeholder for server-side and initial client render
         <div style={{ height: '100%', minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#333', borderRadius: '16px' }}>
           <p style={{ color: '#ccc' }}>Initializing Map...</p>
         </div>
