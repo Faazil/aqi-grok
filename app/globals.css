@@ -1,244 +1,243 @@
-/* app/globals.css (Add these theme definitions) */
+/* app/globals.css (COMPLETE FILE - Includes Theme Variable Fix) */
+
+/* ------------------------------------------------ */
+/* --- 1. THEME VARIABLE DEFINITIONS (FIXED) --- */
+/* ------------------------------------------------ */
 
 :root {
-  /* Default (Light) Theme - This is the current theme */
-  --bg-color-primary: #1a1a1a;
-  --bg-color-secondary: #252525;
+  /* Default/Original Theme (Your original dark gray look) */
+  --bg-color-primary: #111111;  /* Dark background for the main page/body */
+  --bg-color-secondary: #222222; /* Slightly lighter dark background for panels/cards */
   --text-color-primary: #ffffff;
   --text-color-secondary: #aaaaaa;
-}
-
-.light-theme {
-  /* Keeping the current dark aesthetic as 'light' since your original theme was dark */
-  --bg-color-primary: #1a1a1a;
-  --bg-color-secondary: #252525;
-  --text-color-primary: #ffffff;
-  --text-color-secondary: #aaaaaa;
+  --panel-shadow: rgba(0, 0, 0, 0.4); 
 }
 
 .dark-theme {
-  /* An even darker theme for contrast */
+  /* An even darker theme for contrast when dark mode is toggled */
   --bg-color-primary: #000000;
   --bg-color-secondary: #0a0a0a;
   --text-color-primary: #f0f0f0;
   --text-color-secondary: #999999;
+  --panel-shadow: rgba(0, 0, 0, 0.8); 
 }
 
-/* Ensure these CSS variables are applied globally */
+/* ------------------------------------------------ */
+/* --- 2. GLOBAL STYLES --- */
+/* ------------------------------------------------ */
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html,
 body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  font-family: sans-serif;
+  transition: background-color 0.3s, color 0.3s; /* Smooth transition for theme change */
+}
+
+body {
+  /* Apply primary background and text color to the whole body */
   background-color: var(--bg-color-primary);
   color: var(--text-color-primary);
-  /* The rest of your existing body styles remain here */
+  min-height: 100vh;
+}
+
+/* ------------------------------------------------ */
+/* --- 3. LAYOUT AND COMPONENTS --- */
+/* ------------------------------------------------ */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 20px;
+  min-height: 100vh;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 280px 1fr 400px;
+  gap: 30px;
+  max-width: 1400px;
+  width: 100%;
+  margin-bottom: 50px;
 }
 
 .panel, .center, .aqi-card {
-  /* Apply the secondary background variable to key areas */
+  /* Apply the secondary background to the main components */
   background-color: var(--bg-color-secondary);
-}
-
-/* You will need to review your custom classes (e.g., .search-box input) 
-   and apply --text-color-primary/secondary to them for full theming. */
-/* app/globals.css */
-
-/* Global Reset and Body Styling */
-body {
-  margin: 0;
-  padding: 0;
-  overflow-x: hidden;
-  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
-  color: white;
-}
-
-/* Base Page Styling */
-.page {
-  min-height: 100vh;
-  /* Dark background with image effect */
-  background:
-    linear-gradient(rgba(0,0,0,.7), rgba(0,0,0,.7)),
-    url("https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=2400&q=80");
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-  color: white;
-  padding: 20px 16px; 
-}
-
-/* Main Layout Grid */
-.layout {
-  max-width: 1400px;
-  margin: auto;
-  display: flex;
-  flex-direction: column; /* Mobile First: Stack items vertically */
-  gap: 30px;
-}
-
-/* Media Query for DESKTOP (Grid layout) */
-@media (min-width: 1024px) {
-  .layout {
-    display: grid;
-    /* 3-column layout: Sidebar, Center Content, Map */
-    grid-template-columns: 300px 1fr 360px; 
-    gap: 40px;
-    padding: 40px 24px;
-  }
-  
-  /* CRITICAL: Give the map container a fixed height on desktop */
-  .layout > aside:last-child {
-    height: 600px; 
-  }
-}
-
-/* ---------------------------------------------------------------------- */
-/* --- COMPONENT STYLES --- */
-/* ---------------------------------------------------------------------- */
-
-.panel {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  width: 100%; 
-}
-
-.aqi-row {
-  padding: 10px 14px;
-  border-radius: 6px;
-  font-weight: 600;
-  display: flex;
-  justify-content: space-between;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
-  color: #000; /* Text color for the colored rows */
-}
-
-/* Style for rows that trigger the map zoom */
-.clickable-row {
-    cursor: pointer;
-    transition: transform 0.1s ease, box-shadow 0.1s ease;
-}
-
-.clickable-row:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+  border-radius: 12px;
+  padding: 20px;
+  transition: background-color 0.3s;
+  box-shadow: 0 4px 12px var(--panel-shadow);
 }
 
 .center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
 }
 
-.aqi-card {
-  background: #222;
-  color: white;
-  border-radius: 16px;
-  padding: 26px 36px;
-  display: inline-block;
-  margin: 20px 0;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-}
+/* --- AQI ROWS/CARDS --- */
 
-.value {
-  font-size: 42px;
+.aqi-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 15px;
+  margin-bottom: 5px;
+  border-radius: 8px;
   font-weight: bold;
+  color: black; /* AQI colors are fixed to be readable against a dark background */
 }
 
-/* Search Box: Flexible layout */
+.clickable-row {
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.clickable-row:hover {
+  opacity: 0.8;
+}
+
+.aqi-card {
+  width: 250px;
+  padding: 30px 20px;
+  margin: 20px auto;
+}
+
+.aqi-card .value {
+  font-size: 48px;
+  font-weight: 700;
+  color: var(--text-color-primary);
+}
+
+.aqi-card .label {
+  font-size: 14px;
+  color: var(--text-color-secondary);
+}
+
+/* --- SEARCH --- */
 .search-box {
   display: flex;
-  justify-content: center;
-  gap: 12px;
   width: 100%;
-  max-width: 500px; 
-  margin: 0 auto;   
+  max-width: 350px;
+  margin-top: 20px;
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 .search-box input {
-  flex: 1;         
-  min-width: 0;    
-  padding: 12px 16px;
-  border-radius: 999px;
+  flex-grow: 1;
+  padding: 10px 15px;
   border: none;
-  font-size: 16px; 
-  background-color: #1a1a1a;
-  color: white;
+  outline: none;
+  font-size: 16px;
+  /* Apply theme variables to input for visibility */
+  background-color: var(--bg-color-primary); 
+  color: var(--text-color-primary);
 }
 
 .search-box button {
-  padding: 12px 24px;
-  border-radius: 999px;
-  background: #4f46e5;
+  background-color: #6366f1; /* Indigo */
   color: white;
-  font-weight: bold;
+  padding: 10px 15px;
   border: none;
   cursor: pointer;
-  white-space: nowrap; 
-  transition: background 0.2s;
+  transition: background-color 0.2s;
 }
 
 .search-box button:hover:not(:disabled) {
-    background: #3b30d3;
+  background-color: #4f46e5;
 }
 
-.search-box button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+/* --- META AND FOOTER --- */
+.meta {
+  font-size: 0.9em;
+  color: var(--text-color-secondary);
+  margin-top: 15px;
 }
 
-.meta, .visitors {
-    opacity: 0.85;
-    margin-top: 10px;
+.visitors {
+    font-size: 0.8em;
+    color: var(--text-color-secondary);
+    margin-top: 5px;
 }
 
-/* LEAFLET MAP STYLES */
-.leaflet-container {
-    height: 100%;
+/* --- FOOTER STYLES --- */
+footer {
     width: 100%;
-    border-radius: 16px;
+    text-align: center;
+    padding: 20px 0;
+    font-size: 0.8em;
+    color: var(--text-color-secondary);
+    border-top: 1px solid #333;
+    margin-top: 40px;
 }
 
-.leaflet-popup-content-wrapper {
-    background: #fff;
-    color: #333;
-    border-radius: 12px;
+footer a {
+    color: #6366f1;
+    text-decoration: none;
+    margin: 0 10px;
 }
 
-.leaflet-popup-tip {
-    background: #fff;
+footer a:hover {
+    text-decoration: underline;
 }
 
-/* ---------------------------------------------------------------------- */
-/* --- SKELETON STYLES (for loading UX) --- */
-/* ---------------------------------------------------------------------- */
+/* --- SKELETON STYLES --- */
+.skeleton-box {
+  background: linear-gradient(90deg, var(--bg-color-secondary) 25%, #333 50%, var(--bg-color-secondary) 75%);
+  background-size: 400% 100%;
+  animation: loading 1.5s infinite;
+  border-radius: 8px;
+}
 
-/* Shimmer animation definition */
-@keyframes shimmer {
+.aqi-card-skeleton {
+    height: 90px;
+    width: 150px;
+    margin: 0 auto;
+}
+
+@keyframes loading {
   0% {
-    background-position: -400px 0;
+    background-position: 200% 0;
   }
   100% {
-    background-position: 400px 0;
+    background-position: -200% 0;
   }
 }
 
-.skeleton-box {
-  /* This base styling creates the animated shimmer effect */
-  background: #282828; 
-  animation: shimmer 2s infinite linear;
-  background: linear-gradient(to right, #282828 8%, #3f3f3f 18%, #282828 33%);
-  background-size: 800px 104px;
+/* ------------------------------------------------ */
+/* --- 4. MEDIA QUERIES (Responsiveness) --- */
+/* ------------------------------------------------ */
+
+@media (max-width: 1200px) {
+  .layout {
+    grid-template-columns: 1fr 1fr;
+    max-width: 900px;
+  }
+  /* Move map to the bottom on smaller screens */
+  aside:last-child {
+    grid-column: 1 / -1;
+    order: 4;
+  }
 }
 
-/* Skeleton for the National Average Card value */
-.aqi-card-skeleton {
-    width: 100px;
-    height: 42px;
-    margin: 0 auto;
-    border-radius: 8px;
-    margin-bottom: 5px;
-}
-
-/* Skeleton for the List Rows (Worst/Best AQI) */
-.aqi-row-skeleton {
-  /* Inherits aqi-row padding, then adds its own style */
-  padding: 10px 14px;
-  margin-bottom: 12px;
-  height: 40px; 
-  border-radius: 6px;
+@media (max-width: 768px) {
+  .layout {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .panel {
+    order: 2;
+  }
+  .center {
+    order: 1;
+  }
 }
