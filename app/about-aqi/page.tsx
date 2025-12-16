@@ -1,6 +1,11 @@
-// app/about-aqi/page.tsx (FINAL VERSION WITH POLLUTANT UNITS ADDED)
+// app/about-aqi/page.tsx (CRITICAL FIX: ALL UNITS CONVERTED TO UNICODE/HTML)
 import Link from 'next/link';
 import Footer from '../components/Footer'; 
+
+// Function to safely render m³ (cubic meter) using superscript
+const renderM3 = () => <span>m&sup3;</span>;
+// Function to safely render µg (microgram) using unicode
+const renderMicrogram = () => <span>&micro;g</span>;
 
 const AboutAqiPage = () => {
   return (
@@ -41,19 +46,19 @@ const AboutAqiPage = () => {
         </p>
         <ul style={{ listStyleType: 'disc', paddingLeft: '20px' }}>
           <li style={{ marginBottom: '10px' }}>
-            <strong>PM2.5 and PM10:</strong> Fine Particulate Matter. Measured in **$\mu \text{g}/\text{m}^3$** (micrograms per cubic meter).
+            <strong>PM2.5 and PM10:</strong> Fine Particulate Matter. Measured in **{renderMicrogram()}/{renderM3()}** (micrograms per cubic meter).
           </li>
           <li style={{ marginBottom: '10px' }}>
-            <strong>Ozone (O<sub>3</sub>):</strong> Measured in **$\mu \text{g}/\text{m}^3$** or **ppb** (parts per billion).
+            <strong>Ozone (O<sub>3</sub>):</strong> Measured in **{renderMicrogram()}/{renderM3()}** or **ppb** (parts per billion).
           </li>
           <li style={{ marginBottom: '10px' }}>
-            <strong>Nitrogen Dioxide (NO<sub>2</sub>):</strong> Measured in **$\mu \text{g}/\text{m}^3$** or **ppb**.
+            <strong>Nitrogen Dioxide (NO<sub>2</sub>):</strong> Measured in **{renderMicrogram()}/{renderM3()}** or **ppb**.
           </li>
           <li style={{ marginBottom: '10px' }}>
-            <strong>Carbon Monoxide (CO):</strong> Measured in **$\text{mg}/\text{m}^3$** (milligrams per cubic meter) or **ppm** (parts per million).
+            <strong>Carbon Monoxide (CO):</strong> Measured in **mg/{renderM3()}** (milligrams per cubic meter) or **ppm** (parts per million).
           </li>
           <li style={{ marginBottom: '10px' }}>
-            <strong>Sulphur Dioxide (SO<sub>2</sub>):</strong> Measured in **$\mu \text{g}/\text{m}^3$** or **ppb**.
+            <strong>Sulphur Dioxide (SO<sub>2</sub>):</strong> Measured in **{renderMicrogram()}/{renderM3()}** or **ppb**.
           </li>
         </ul>
         
