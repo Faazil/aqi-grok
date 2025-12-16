@@ -1,11 +1,11 @@
-// app/page.tsx (FINAL VERSION WITH DARK MODE TOGGLE)
+// app/page.tsx (FINAL VERSION WITH DARK MODE TOGGLE AND SYNTAX FIX)
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import type { CityData } from './components/AqiMap';
 import MapWrapper from './components/MapWrapper'; 
 import { useInterval } from './hooks/useInterval'; 
-import { useLocalStorage } from './hooks/useLocalStorage'; // NEW IMPORT
+import { useLocalStorage } from './hooks/useLocalStorage'; 
 import Footer from './components/Footer'; 
 
 const API_TOKEN = process.env.NEXT_PUBLIC_WAQI_TOKEN;
@@ -18,7 +18,6 @@ const SkeletonRow = () => (
 
 // --- Component to display the search result AQI ---
 const SearchResultAqiDisplay = ({ city }: { city: CityData }) => {
-    // Note: Colors for AQI blocks remain fixed for readability, independent of theme
     return (
         <div 
             className="aqi-card search-result-card" 
@@ -51,7 +50,7 @@ export default function HomePage() {
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null); 
   const [searchedCityResult, setSearchedCityResult] = useState<CityData | null>(null);
   
-  // NEW STATE: Theme Management (using 'light' as the default/initial theme)
+  // THEME STATE: Managed by localStorage hook
   const [theme, setTheme] = useLocalStorage<'light' | 'dark'>('aqiTheme', 'light');
 
   const initialCities = [
@@ -204,7 +203,7 @@ export default function HomePage() {
 
   return (
     <main className="page">
-      {/* NEW: THEME TOGGLE BUTTON */}
+      {/* THEME TOGGLE BUTTON */}
       <button 
         onClick={toggleTheme}
         style={{
@@ -278,7 +277,8 @@ export default function HomePage() {
         <section className="center">
           <h1>Live AQI India</h1>
 
-          <div className className="aqi-card">
+          {/* FIX APPLIED: Corrected the redundant className attribute */}
+          <div className="aqi-card">
             <div className="value">
               {loading ? (
                 <div className="skeleton-box aqi-card-skeleton" />
