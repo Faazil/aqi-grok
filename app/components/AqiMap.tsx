@@ -12,13 +12,14 @@ const getLevelColor = (aqi: number) => {
   return '#7f1d1d';                   // Dark Red/Maroon
 };
 
-// Interface definition for city data
+// --- CORRECTED INTERFACE: ADDED 'color' PROPERTY ---
 export interface CityData {
   name: string;
   aqi: number;
   level: string;
   lat: number;
   lng: number;
+  color: string; // <-- **FIXED: This property is now required**
 }
 
 interface AqiMapProps {
@@ -43,8 +44,8 @@ export default function AqiMap({ cityData }: AqiMapProps) {
       />
 
       {cityData.map((city) => {
-        // Use the color logic here to define the marker style
-        const color = getLevelColor(city.aqi);
+        // Use the color property directly from the CityData object
+        const color = city.color; 
         
         return (
           <CircleMarker
