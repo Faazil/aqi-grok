@@ -1,9 +1,8 @@
-// app/page.tsx (REVERTED TO BASIC FUNCTIONALITY + MapWrapper FIX)
+// app/page.tsx (FINAL VERSION WITH 50 CITIES/CAPITALS)
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import type { CityData } from './components/AqiMap';
-// We are reverting to only import the MapWrapper
 import MapWrapper from './components/MapWrapper'; 
 
 const API_TOKEN = process.env.NEXT_PUBLIC_WAQI_TOKEN;
@@ -20,13 +19,20 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [focusCoords, setFocusCoords] = useState<[number, number] | null>(null); 
-  // Reverting visitor count state to null/untracked
-  const [visitorCount, setVisitorCount] = useState<number | null>(null); 
+  const [visitorCount, setVisitorCount] = useState<number | null>(1); // Reverted to static 1
   
+  // DEFINITIVE LIST: 50 Major Cities and State/UT Capitals of India
   const initialCities = [
     'Delhi', 'Mumbai', 'Kolkata', 'Chennai', 'Bengaluru', 
-    'Hyderabad', 'Pune', 'Ahmedabad', 'Lucknow', 'Jaipur', 
-    'Patna', 'Gurugram', 'Noida', 'Chandigarh'
+    'Hyderabad', 'Pune', 'Ahmedabad', 'Surat', 'Jaipur',
+    'Lucknow', 'Patna', 'Kanpur', 'Nagpur', 'Indore',
+    'Thane', 'Bhopal', 'Visakhapatnam', 'Vadodara', 'Ghaziabad',
+    'Ludhiana', 'Agra', 'Nashik', 'Faridabad', 'Varanasi',
+    'Amritsar', 'Noida', 'Gurugram', 'Chandigarh', 'Coimbatore',
+    'Kochi', 'Madurai', 'Tiruchirappalli', 'Guwahati', 'Bhubaneswar',
+    'Ranchi', 'Raipur', 'Dehradun', 'Shimla', 'Jabalpur',
+    'Jodhpur', 'Srinagar', 'Jammu', 'Puducherry', 'Panaji',
+    'Amaravati', 'Dispur', 'Aizawl', 'Shillong', 'Itanagar'
   ];
 
   const getLevel = (aqi: number) => {
@@ -67,7 +73,7 @@ export default function HomePage() {
     return null;
   }, []);
 
-  // Reverting to the simpler search handler (no debounce logic)
+  // CORRECTED handleSearch FUNCTION
   const handleSearch = async () => {
     if (!search.trim()) return;
     setLoading(true);
@@ -78,11 +84,17 @@ export default function HomePage() {
     if (result) {
       setCities(prev => {
         const exists = prev.find(c => c.name.toLowerCase() === result.name.toLowerCase());
-        if (exists) return prev.map(c => c.name.toLowerCase() === result.name.toLowerCase() ? result : c);
+        
+        if (exists) {
+            return prev.map(c => c.name.toLowerCase() === result.name.toLowerCase() ? result : c);
+        }
+        
         return [...prev, result];
       });
+      
       setFocusCoords([result.lat, result.lng]); 
-      setSearch(''); // Clear search on success
+      setSearch(''); 
+      
     } else {
         if (!error || !error.includes("AQI Token is missing")) { 
             setError(`Could not find data for "${search}" or the city name is invalid.`);
@@ -92,7 +104,7 @@ export default function HomePage() {
   };
 
 
-  // EFFECT: Initial Data Load ONLY (Removed visitor count fetch)
+  // EFFECT: Initial Data Load ONLY 
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
@@ -205,14 +217,12 @@ export default function HomePage() {
           </div>
 
           <div className="visitors">
-            {/* Reverting to a static/placeholder visitor count */}
-            👁 Visitors today: 1
+            👁 Visitors today: {visitorCount}
           </div>
         </section>
 
         {/* RIGHT PANEL: The Map Wrapper Component */}
         <aside>
-          {/* Ensure MapWrapper is correctly defined in app/components/MapWrapper.tsx */}
           <MapWrapper cityData={cities} focusCoords={focusCoords} />
         </aside>
       </div>
