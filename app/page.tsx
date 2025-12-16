@@ -1,13 +1,15 @@
-// app/page.tsx (FINAL VERSION WITH 50 CITIES/CAPITALS)
+// app/page.tsx (FINAL VERSION WITH AUTO-REFRESH)
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import type { CityData } from './components/AqiMap';
 import MapWrapper from './components/MapWrapper'; 
+import { useInterval } from './hooks/useInterval'; // NEW IMPORT
 
 const API_TOKEN = process.env.NEXT_PUBLIC_WAQI_TOKEN;
+const REFRESH_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
 
-// --- Skeleton Component (Used for better loading UX) ---
+// --- Skeleton Component ---
 const SkeletonRow = () => (
     <div className="aqi-row aqi-row-skeleton skeleton-box" style={{height: 40}}></div>
 );
@@ -19,9 +21,9 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [focusCoords, setFocusCoords] = useState<[number, number] | null>(null); 
-  const [visitorCount, setVisitorCount] = useState<number | null>(1); // Reverted to static 1
+  const [visitorCount, setVisitorCount] = useState<number | null>(1);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null); // NEW STATE for tracking time
   
-  // DEFINITIVE LIST: 50 Major Cities and State/UT Capitals of India
   const initialCities = [
     'Delhi', 'Mumbai', 'Kolkata', 'Chennai', 'Bengaluru', 
     'Hyderabad', 'Pune', 'Ahmedabad', 'Surat', 'Jaipur',
@@ -73,7 +75,48 @@ export default function HomePage() {
     return null;
   }, []);
 
-  // CORRECTED handleSearch FUNCTION
+  // NEW FUNCTION: Handles both initial load and auto-refresh
+  const refreshCityData = useCallback(async (isInitialLoad: boolean = false) => {
+    if (isInitialLoad) {
+      setLoading(true);
+      setError(null);
+    } else {
+      // For auto-refresh, avoid showing the full loading skeleton/spinner
+      console.log('Auto-refreshing city data...');
+    }
+
+    const cityNamesToFetch = isInitialLoad ? initialCities : cities.map(c => c.name);
+    
+    const promises = cityNamesToFetch.map(city => fetchCityAqi(city));
+    const results = await Promise.all(promises);
+    
+    const validCities = results.filter((c): c is CityData => c !== null);
+    
+    setCities(validCities);
+    setLastUpdated(new Date()); // Update the last updated time
+    
+    if (isInitialLoad) {
+      setLoading(false);
+      if (!API_TOKEN) {
+         setError("WARNING: AQI Token is missing. Using restricted 'demo' mode.");
+      }
+    }
+  }, [fetchCityAqi, initialCities, cities]);
+
+  // Hook 1: Initial Data Load (Runs once on mount)
+  useEffect(() => {
+    refreshCityData(true);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); 
+
+  // Hook 2: Auto-Refresh using useInterval
+  useInterval(() => {
+    if (!loading) {
+        refreshCityData(false);
+    }
+  }, REFRESH_INTERVAL_MS);
+
+  // Search Handler (Unchanged from last stable version)
   const handleSearch = async () => {
     if (!search.trim()) return;
     setLoading(true);
@@ -104,28 +147,6 @@ export default function HomePage() {
   };
 
 
-  // EFFECT: Initial Data Load ONLY 
-  useEffect(() => {
-    const loadData = async () => {
-      setLoading(true);
-      setError(null);
-      
-      const promises = initialCities.map(city => fetchCityAqi(city));
-      const results = await Promise.all(promises);
-      
-      const validCities = results.filter((c): c is CityData => c !== null);
-      
-      setCities(validCities);
-      setLoading(false);
-      
-      if (!API_TOKEN) {
-         setError("WARNING: AQI Token is missing. Using restricted 'demo' mode.");
-      }
-    };
-
-    loadData();
-  }, [fetchCityAqi]);
-
   const handleCityClick = (city: CityData) => {
     setFocusCoords([city.lat, city.lng]);
   };
@@ -137,6 +158,11 @@ export default function HomePage() {
   const avgAqi = cities.length > 0 
     ? Math.round(cities.reduce((acc, curr) => acc + curr.aqi, 0) / cities.length) 
     : 0;
+    
+  // Helper to display last updated time
+  const timeDisplay = lastUpdated
+    ? lastUpdated.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })
+    : '...';
 
   return (
     <main className="page">
@@ -206,7 +232,7 @@ export default function HomePage() {
           {error && <p style={{ color: error.includes("WARNING") ? '#ffc107' : '#f87171', marginTop: 10 }}>{error}</p>}
 
           <div className="meta">
-            ● Live Data · {cities.length} cities tracked
+            ● Live Data · {cities.length} cities tracked. Last updated: {timeDisplay}
             <button 
                 onClick={() => setFocusCoords(null)} 
                 style={{ background: 'none', border: 'none', color: 'white', marginLeft: '10px', textDecoration: 'underline', cursor: 'pointer', opacity: focusCoords ? 1 : 0.5 }}
