@@ -1,16 +1,14 @@
-// app/page.tsx
+// app/page.tsx (REVERTED TO BASIC FUNCTIONALITY + MapWrapper FIX)
 'use client';
 
-// Removed dynamic import of AqiMap here, it's now handled inside MapWrapper
 import { useState, useEffect, useCallback } from 'react';
 import type { CityData } from './components/AqiMap';
-import { useDebounce } from './hooks/useDebounce'; 
-// NEW IMPORT: Use the wrapper component to ensure client-side rendering of the map
+// We are reverting to only import the MapWrapper
 import MapWrapper from './components/MapWrapper'; 
 
 const API_TOKEN = process.env.NEXT_PUBLIC_WAQI_TOKEN;
 
-// --- Skeleton Component (Used in this file) ---
+// --- Skeleton Component (Used for better loading UX) ---
 const SkeletonRow = () => (
     <div className="aqi-row aqi-row-skeleton skeleton-box" style={{height: 40}}></div>
 );
@@ -22,11 +20,9 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [focusCoords, setFocusCoords] = useState<[number, number] | null>(null); 
-  const [visitorData, setVisitorData] = useState<{totalHits: number, uniqueVisitors: number} | null>(null); 
+  // Reverting visitor count state to null/untracked
+  const [visitorCount, setVisitorCount] = useState<number | null>(null); 
   
-  // Debounce the search term to prevent excessive API calls
-  const debouncedSearch = useDebounce(search, 500); 
-
   const initialCities = [
     'Delhi', 'Mumbai', 'Kolkata', 'Chennai', 'Bengaluru', 
     'Hyderabad', 'Pune', 'Ahmedabad', 'Lucknow', 'Jaipur', 
@@ -42,7 +38,6 @@ export default function HomePage() {
     return { level: 'Severe', color: '#7f1d1d' };
   };
 
-  // Memoized function for fetching AQI data
   const fetchCityAqi = useCallback(async (cityName: string): Promise<CityData | null> => {
     const token = API_TOKEN || 'demo'; 
     
@@ -72,12 +67,13 @@ export default function HomePage() {
     return null;
   }, []);
 
-  // Handler for search (used by both debounce and explicit click)
-  const handleDebouncedSearch = useCallback(async (searchTerm: string) => {
+  // Reverting to the simpler search handler (no debounce logic)
+  const handleSearch = async () => {
+    if (!search.trim()) return;
     setLoading(true);
     setError(null);
 
-    const result = await fetchCityAqi(searchTerm);
+    const result = await fetchCityAqi(search);
     
     if (result) {
       setCities(prev => {
@@ -86,45 +82,18 @@ export default function HomePage() {
         return [...prev, result];
       });
       setFocusCoords([result.lat, result.lng]); 
+      setSearch(''); // Clear search on success
     } else {
         if (!error || !error.includes("AQI Token is missing")) { 
-            if (searchTerm === search) {
-                setError(`Could not find data for "${searchTerm}" or the city name is invalid.`);
-            }
+            setError(`Could not find data for "${search}" or the city name is invalid.`);
         }
     }
     setLoading(false);
-  }, [fetchCityAqi, search, error]);
-
-  // EFFECT: Watches debouncedSearch and automatically triggers API call
-  useEffect(() => {
-    if (debouncedSearch.trim() && !cities.find(c => c.name.toLowerCase() === debouncedSearch.toLowerCase())) {
-        handleDebouncedSearch(debouncedSearch);
-    }
-  }, [debouncedSearch, cities, handleDebouncedSearch]);
-
-  // Handler for explicit button click
-  const handleExplicitSearchClick = () => {
-    if (search.trim()) {
-        handleDebouncedSearch(search);
-    }
   };
 
-  // EFFECT: Initial Data Load and Visitor Count Fetch
+
+  // EFFECT: Initial Data Load ONLY (Removed visitor count fetch)
   useEffect(() => {
-    const fetchVisitorCount = async () => {
-        try {
-            const res = await fetch('/api/visits');
-            const data = await res.json();
-            
-            if (res.ok) {
-                setVisitorData({totalHits: data.totalHits, uniqueVisitors: data.uniqueVisitors});
-            }
-        } catch (err) {
-            console.error('Visitor API Error:', err);
-        }
-    };
-    
     const loadData = async () => {
       setLoading(true);
       setError(null);
@@ -143,7 +112,6 @@ export default function HomePage() {
     };
 
     loadData();
-    fetchVisitorCount();
   }, [fetchCityAqi]);
 
   const handleCityClick = (city: CityData) => {
@@ -216,9 +184,9 @@ export default function HomePage() {
               placeholder="Search any city (e.g. Surat)..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleExplicitSearchClick()}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
             />
-            <button onClick={handleExplicitSearchClick} disabled={loading}>
+            <button onClick={handleSearch} disabled={loading}>
               {loading ? '...' : 'Search'}
             </button>
           </div>
@@ -237,17 +205,14 @@ export default function HomePage() {
           </div>
 
           <div className="visitors">
-            👁 Visitors today: {visitorData === null ? '...' : visitorData.uniqueVisitors.toLocaleString()}
-            {visitorData !== null && visitorData.totalHits > visitorData.uniqueVisitors && (
-                <span style={{ marginLeft: 10, opacity: 0.7, fontSize: '0.9em' }}>
-                    ({visitorData.totalHits} total hits)
-                </span>
-            )}
+            {/* Reverting to a static/placeholder visitor count */}
+            👁 Visitors today: 1
           </div>
         </section>
 
         {/* RIGHT PANEL: The Map Wrapper Component */}
         <aside>
+          {/* Ensure MapWrapper is correctly defined in app/components/MapWrapper.tsx */}
           <MapWrapper cityData={cities} focusCoords={focusCoords} />
         </aside>
       </div>
