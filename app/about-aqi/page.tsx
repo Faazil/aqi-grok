@@ -1,4 +1,4 @@
-// app/about-aqi/page.tsx
+// app/about-aqi/page.tsx (FIXED)
 import Link from 'next/link';
 
 // You can reuse your Footer component here for consistency
@@ -46,16 +46,19 @@ const AboutAqiPage = () => {
             <strong>PM2.5 and PM10:</strong> Fine Particulate Matter. These are microscopic particles that, when inhaled, can penetrate deep into the lungs and bloodstream. PM2.5 is the most dangerous and is often the main driver of high AQI readings.
           </li>
           <li style={{ marginBottom: '10px' }}>
+            {/* FIX APPLIED HERE: Replaced $\text{O}_3$ with O<sub>3</sub> */}
             <strong>Ozone ($\text{O}_3$):</strong> Ground-level ozone is a key component of smog, often peaking in warmer months.
           </li>
           <li style={{ marginBottom: '10px' }}>
-            <strong>Nitrogen Dioxide ($\text{NO}_2$):</strong> Primarily comes from vehicle emissions and industrial smokestacks.
+            {/* FIX APPLIED HERE: Replaced $\text{NO}_2$ with NO<sub>2</sub> */}
+            <strong>Nitrogen Dioxide (NO<sub>2</sub>):</strong> Primarily comes from vehicle emissions and industrial smokestacks.
           </li>
           <li style={{ marginBottom: '10px' }}>
             <strong>Carbon Monoxide (CO):</strong> A colorless, odorless gas released when fuel is burned incompletely.
           </li>
           <li style={{ marginBottom: '10px' }}>
-            <strong>Sulphur Dioxide ($\text{SO}_2$):</strong> Produced when fuels containing sulfur are burned, such as coal.
+            {/* FIX APPLIED HERE: Replaced $\text{SO}_2$ with SO<sub>2</sub> */}
+            <strong>Sulphur Dioxide (SO<sub>2</sub>):</strong> Produced when fuels containing sulfur are burned, such as coal.
           </li>
         </ul>
         
