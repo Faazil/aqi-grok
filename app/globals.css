@@ -136,6 +136,11 @@ body {
     background: #3b30d3;
 }
 
+.search-box button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 .meta, .visitors {
     opacity: 0.85;
     margin-top: 10px;
