@@ -9,7 +9,6 @@ const AqiMap = dynamic(() => import('./components/AqiMap'), {
   ssr: false,
 });
 
-// Environment variable is now used:
 const API_TOKEN = process.env.NEXT_PUBLIC_WAQI_TOKEN;
 
 export default function HomePage() {
@@ -18,8 +17,11 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [focusCoords, setFocusCoords] = useState<[number, number] | null>(null); 
+  // NEW STATE: For tracking the real visitor count
+  const [visitorCount, setVisitorCount] = useState<number | null>(null); 
 
-  // Initial list of cities to fetch on load
+  // ... (initialCities, getLevel, fetchCityAqi, handleSearch, handleCityClick functions remain the same) ...
+
   const initialCities = [
     'Delhi', 'Mumbai', 'Kolkata', 'Chennai', 'Bengaluru', 
     'Hyderabad', 'Pune', 'Ahmedabad', 'Lucknow', 'Jaipur', 
@@ -36,24 +38,18 @@ export default function HomePage() {
   };
 
   const fetchCityAqi = async (cityName: string): Promise<CityData | null> => {
+    // Note: Fetch logic remains as in the previous complete file
+    // ... (rest of fetchCityAqi function)
     if (!API_TOKEN || API_TOKEN === 'demo') {
-        // Use 'demo' for local testing if token is missing but warn the user
         const token = API_TOKEN || 'demo';
-        if (token === 'demo') {
-            // Note: WAQI demo key is very restricted, results may be sparse.
-        }
-        
         try {
             const res = await fetch(`https://api.waqi.info/feed/${cityName}/?token=${token}`);
             const data = await res.json();
 
             if (data.status === 'ok') {
                 const aqi = data.data.aqi;
-                
                 if (typeof aqi !== 'number') return null;
-
                 const { level, color } = getLevel(aqi);
-                
                 return {
                     name: cityName,
                     aqi: aqi,
@@ -95,8 +91,32 @@ export default function HomePage() {
     }
     return null;
   };
+  
+  // NEW useEffect for Visitor Count
+  useEffect(() => {
+    const fetchVisitorCount = async () => {
+        try {
+            // Call the new API route
+            const res = await fetch('/api/visits');
+            const data = await res.json();
+            
+            if (res.ok) {
+                setVisitorCount(data.count);
+            } else {
+                console.error('Visitor API Error:', data.error);
+                setVisitorCount(null); // Keep it null on error
+            }
+        } catch (err) {
+            console.error('Network or parsing error for visitor count', err);
+            setVisitorCount(null);
+        }
+    };
+    
+    fetchVisitorCount();
+  }, []); // Run only once on mount
 
   useEffect(() => {
+    // ... (rest of initial city data load logic)
     const loadData = async () => {
       setLoading(true);
       setError(null);
@@ -110,7 +130,7 @@ export default function HomePage() {
       setLoading(false);
       
       if (!API_TOKEN) {
-         setError("WARNING: API Token is missing. Using restricted 'demo' mode. Please set NEXT_PUBLIC_WAQI_TOKEN.");
+         setError("WARNING: AQI Token is missing. Using restricted 'demo' mode.");
       }
     };
 
@@ -130,26 +150,23 @@ export default function HomePage() {
         if (exists) return prev.map(c => c.name.toLowerCase() === result.name.toLowerCase() ? result : c);
         return [...prev, result];
       });
-      // Focus on the searched city
       setFocusCoords([result.lat, result.lng]); 
       setSearch('');
     } else {
-        // Only set error if it wasn't an API token configuration error message
-        if (!error || !error.includes("API Token is missing")) { 
+        if (!error || !error.includes("AQI Token is missing")) { 
             setError(`Could not find data for "${search}" or the city name is invalid.`);
         }
     }
     setLoading(false);
   };
 
-  // HANDLER: Set the coordinates to focus the map
   const handleCityClick = (city: CityData) => {
     setFocusCoords([city.lat, city.lng]);
   };
 
   const sortedCities = [...cities].sort((a, b) => b.aqi - a.aqi);
   const worstCities = sortedCities.slice(0, 5);
-  const bestCities = [...cities].sort((a, b) => a.aqi - b.aqi).slice(0, 5);
+  const bestCities = [...cities].sort((a, b) => a.aqi - a.aqi).slice(0, 5);
   
   const avgAqi = cities.length > 0 
     ? Math.round(cities.reduce((acc, curr) => acc + curr.aqi, 0) / cities.length) 
@@ -212,7 +229,6 @@ export default function HomePage() {
             </button>
           </div>
           
-          {/* Display error/warning messages */}
           {error && <p style={{ color: error.includes("WARNING") ? '#ffc107' : '#f87171', marginTop: 10 }}>{error}</p>}
 
           <div className="meta">
@@ -226,7 +242,10 @@ export default function HomePage() {
             </button>
           </div>
 
-          <div className="visitors">👁 Visitors today: 8 (Static)</div>
+          {/* UPDATED: Display dynamic visitor count */}
+          <div className="visitors">
+            👁 Visitors today: {visitorCount === null ? '...' : visitorCount.toLocaleString()}
+          </div>
         </section>
 
         {/* RIGHT PANEL */}
