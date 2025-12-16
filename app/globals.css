@@ -64,6 +64,18 @@ html, body {
   box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
 }
 
+/* NEW STYLE FOR CLICKABLE ROWS */
+.clickable-row {
+    cursor: pointer;
+    transition: transform 0.1s ease;
+}
+
+.clickable-row:hover {
+    transform: scale(1.02);
+    /* Optional: Add a subtle lift effect on hover */
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+}
+
 .center {
   text-align: center;
 }
