@@ -1,41 +1,46 @@
 // app/disclaimer/page.tsx
 import Link from 'next/link';
-import Footer from '../components/Footer'; 
+import Footer from '../components/Footer';
 
 const DisclaimerPage = () => {
   return (
     <div style={{ minHeight: '100vh', padding: '40px 20px', backgroundColor: '#111', color: 'white', fontFamily: 'sans-serif' }}>
-      <div style={{ maxWidth: '800px', margin: '0 auto', padding: '30px', backgroundColor: '#222', borderRadius: '12px' }}>
-        <h1 style={{ textAlign: 'center', color: '#6366f1', borderBottom: '1px solid #444', paddingBottom: '20px' }}>
-          Data Disclaimer
-        </h1>
-        <p style={{ marginTop: '20px', color: '#aaa' }}>
-          **Effective Date:** December 17, 2025
+      <div style={{ maxWidth: '850px', margin: '0 auto', padding: '40px', backgroundColor: '#222', borderRadius: '16px', lineHeight: '1.8' }}>
+        <h1 style={{ textAlign: 'center', color: '#6366f1' }}>Detailed Disclaimer</h1>
+        <p style={{ textAlign: 'center', color: '#aaa', marginBottom: '40px' }}>Last Updated: December 2025</p>
+
+        <h2 style={{ color: '#a78bfa', borderBottom: '1px solid #444', paddingBottom: '10px' }}>1. General Information Only</h2>
+        <p>
+          The information provided by <strong>Live AQI India (aqiindia.live)</strong> is for general informational and educational purposes only. All information on the site is provided in good faith, however, we make no representation or warranty of any kind, express or implied, regarding the accuracy, adequacy, validity, reliability, availability, or completeness of any information on the site.
         </p>
 
-        <h2 style={{ color: '#a78bfa', marginTop: '30px' }}>1. Data Source and Accuracy</h2>
+        <h2 style={{ color: '#a78bfa', borderBottom: '1px solid #444', paddingBottom: '10px', marginTop: '30px' }}>2. Environmental Data Limitation</h2>
         <p>
-          The Air Quality Index (AQI) data displayed on Live AQI India is sourced from the World Air Quality Index (WAQI) project, which aggregates data from various government and monitoring sources globally.
+          The Air Quality Index (AQI) data displayed on this platform is gathered from a variety of sources, including public monitoring stations and third-party APIs like the World Air Quality Index Project. Please be aware that:
         </p>
+        <ul style={{ paddingLeft: '20px' }}>
+          <li><strong>Data Latency:</strong> Real-time data may have a delay of 1 to 4 hours depending on the station reporting frequency.</li>
+          <li><strong>Sensor Accuracy:</strong> Low-cost sensors used in some residential areas may fluctuate more than government-grade monitoring stations.</li>
+          <li><strong>Local Variations:</strong> Air quality can vary significantly between two streets; our data represents the nearest available monitoring station.</li>
+        </ul>
+
+        <h2 style={{ color: '#a78bfa', borderBottom: '1px solid #444', paddingBottom: '10px', marginTop: '30px' }}>3. Health and Medical Disclaimer</h2>
         <p>
-          We rely entirely on the accuracy and timeliness of this third-party data. We do not independently verify the AQI readings. Factors such as sensor placement, calibration issues, and transmission delays can affect the reported data.
+          <strong>Live AQI India is not a medical organization.</strong> The air quality health suggestions (such as "wear a mask" or "avoid outdoor activity") are based on general guidelines provided by environmental protection agencies. This information does not constitute medical advice. Environmental factors affect every individual differently based on their age, pre-existing conditions, and general health. Always consult with a healthcare professional before making decisions that could impact your respiratory or cardiovascular health.
         </p>
 
-        <h2 style={{ color: '#a78bfa', marginTop: '30px' }}>2. Not for Official Use</h2>
+        <h2 style={{ color: '#a78bfa', borderBottom: '1px solid #444', paddingBottom: '10px', marginTop: '30px' }}>4. External Links Disclaimer</h2>
         <p>
-          The information on this website is provided "as is" for general informational and educational purposes only. It is not intended as a substitute for official government reports, regulatory compliance, or professional health/medical advice.
+          The Site may contain links to other websites or content belonging to or originating from third parties. Such external links are not investigated, monitored, or checked for accuracy by us. We do not warrant, endorse, guarantee, or assume responsibility for the accuracy or reliability of any information offered by third-party websites linked through the site.
         </p>
 
-        <h2 style={{ color: '#a78bfa', marginTop: '30px' }}>3. Health Warning</h2>
+        <h2 style={{ color: '#a78bfa', borderBottom: '1px solid #444', paddingBottom: '10px', marginTop: '30px' }}>5. Limitation of Liability</h2>
         <p>
-          **If you are experiencing a health emergency, please contact a medical professional or emergency services immediately.**
-        </p>
-        <p>
-          Relying on any information appearing on this website is solely at your own risk. The owners of Live AQI India are not responsible for any personal health decisions made based on the data presented here.
+          Under no circumstance shall we have any liability to you for any loss or damage of any kind incurred as a result of the use of the site or reliance on any information provided on the site. Your use of the site and your reliance on any information on the site is solely at your own risk.
         </p>
 
-        <p style={{ marginTop: '40px', fontSize: '0.9em', borderTop: '1px solid #444', paddingTop: '20px' }}>
-          By using this website, you acknowledge this disclaimer.
+        <p style={{ marginTop: '40px', textAlign: 'center', fontSize: '0.9rem' }}>
+          By using this site, you agree to our <Link href="/terms-of-service" style={{ color: '#6366f1' }}>Terms of Service</Link>.
         </p>
       </div>
       <Footer />
