@@ -1,40 +1,34 @@
-// app/layout.tsx
-import './globals.css';
+import type { Metadata } from "next";
+import Script from "next/script";
+import "./globals.css";
 
-// You can customize the metadata here
-export const metadata = {
-  title: 'Live AQI India - Real-time Air Quality Index',
-  description: 'Real-time Air Quality Index (AQI) data for major cities across India. Quick, clean, and essential environmental data.',
+// SEO Metadata optimized for AdSense approval
+export const metadata: Metadata = {
+  title: 'Live AQI India - Real-time Air Quality Index Updates',
+  description: 'Monitor real-time Air Quality Index (AQI) data for major cities across India. Stay informed with accurate PM2.5, PM10, and environmental metrics.',
+  viewport: 'width=device-width, initial-scale=1',
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en">
       <head>
-        {/* The built-in Next.js 'metadata' handles <title> and <meta name="description"> */}
-        
-        {/* =======================================================
-          CRITICAL STEP: ADSense VERIFICATION CODE IMPLEMENTATION
-          =======================================================
-          
-          NOTE: I have fixed 'crossorigin' to 'crossOrigin' (camel case).
-          
-          Place the entire <script> tag provided by Google AdSense here.
-          The example below uses your actual client ID prefix (2115058796417473)
-          that was visible in the error message for accuracy.
+        {/* Next.js Script component handles the AdSense snippet.
+          'afterInteractive' strategy ensures the page loads fast 
+          before the ad script initializes, which Google prefers.
         */}
-        <script 
-          async 
+        <Script
+          async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2115058796417473"
-          crossOrigin="anonymous">
-        </script>
-        
-        {/* =======================================================
-          END: ADSense CODE
-          =======================================================
-        */}
+          strategy="afterInteractive"
+          crossOrigin="anonymous"
+        />
       </head>
-      <body>
+      <body className="antialiased">
         {children}
       </body>
     </html>
